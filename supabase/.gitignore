@@ -6,3 +6,6 @@
 .env.keys
 .env.local
 .env.*.local
+
+# Rahasia lokal (SMTP_PASS, dll.) — jangan pernah di-commit
+.env

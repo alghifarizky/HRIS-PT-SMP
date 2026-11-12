@@ -1,18 +1,48 @@
 @import "tailwindcss";
 @import "@fontsource-variable/inter";
 
-/* Token design system — nilai dari docs/handoff.md §4 */
+/* Token design system — docs/handoff.md §4, dilengkapi design system v1 (B1 hal 1) */
 @theme {
   --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
+
   --color-primer: #1E4FD8;
+  --color-primer-50: #EEF3FE;
+  --color-primer-100: #DBE5FD;
+  --color-primer-700: #183FAE;
+
   --color-latar: #F5F7FA;
+  --color-permukaan: #FFFFFF;
+  --color-garis: #E2E8F0;
   --color-teks: #0F172A;
   --color-teks-sekunder: #475569;
-  --color-garis: #E2E8F0;
+  --color-teks-3: #64748B;
+
+  /* Status: teks gelap di atas latar lembut (≥ 4,5:1) */
+  --color-sukses: #166534;
+  --color-sukses-latar: #DCFCE7;
+  --color-sukses-ikon: #15803D;
+  --color-peringatan: #92400E;
+  --color-peringatan-latar: #FEF3C7;
+  --color-peringatan-ikon: #B45309;
+  --color-bahaya: #991B1B;
+  --color-bahaya-latar: #FEE2E2;
+  --color-bahaya-ikon: #B91C1C;
+  --color-info: #1E40AF;
+  --color-info-latar: #DBEAFE;
+  --color-info-ikon: #1D4ED8;
+
   --radius-kontrol: 8px;
   --radius-kartu: 12px;
+  --radius-sheet: 20px;
 }
 
 body {
   @apply bg-latar text-teks font-sans;
+}
+
+/* Fokus keyboard: ring 3px primer-100 + border primer */
+.fokus-ring:focus-visible {
+  outline: none;
+  border-color: var(--color-primer);
+  box-shadow: 0 0 0 3px var(--color-primer-100);
 }

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="id">
+  <body style="margin:0;padding:24px;background:#F5F7FA;font-family:Inter,Arial,sans-serif;color:#0F172A">
+    <table role="presentation" width="100%" style="max-width:480px;margin:0 auto;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px">
+      <tr>
+        <td style="padding:32px 24px">
+          <p style="margin:0 0 24px;font-size:14px;font-weight:600;color:#1E4FD8">HRIS PT. SMP</p>
+          <h1 style="margin:0 0 12px;font-size:22px;line-height:28px">Atur ulang password</h1>
+          <p style="margin:0 0 24px;font-size:15px;line-height:22px;color:#475569">
+            Kami menerima permintaan membuat password baru untuk akun <strong style="color:#0F172A">{{ .Email }}</strong>.
+            Link berlaku 30 menit.
+          </p>
+          <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=recovery"
+             style="display:block;padding:14px 0;border-radius:8px;background:#1E4FD8;color:#FFFFFF;text-align:center;font-size:16px;font-weight:600;text-decoration:none">
+            Buat password baru
+          </a>
+          <p style="margin:24px 0 0;font-size:13px;line-height:20px;color:#64748B">
+            Tidak merasa meminta? Abaikan email ini — password Anda tidak berubah.
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
