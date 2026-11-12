@@ -17,16 +17,17 @@ Web app HRIS internal untuk PT. SMP (±25 karyawan): absensi clock in/out dengan
 | `docs/prd.md` | Kebutuhan fungsional ber-ID (AUTH-, EMP-, ATT-, OT-, LV-, APR-, PAY-, RPT-, NTF-, MST-), aturan bisnis, tahapan | Sebelum membuat fitur apa pun |
 | `docs/spesifikasi.md` | UML (use case, activity, sequence, class), ERD, constraint, catatan teknis Supabase | Sebelum membuat tabel, trigger, RPC, atau alur |
 | `docs/security.md` | Matriks akses RLS, storage, kunci, validasi, checklist rilis | Sebelum menyentuh database, auth, storage, atau data sensitif |
-| Desain Claude Design | Semua layar 4 peran + design system | Sebelum membuat UI |
+| `design/*.pdf` (6 file: Batch 1 Karyawan, 2, 3A, 3B, 3C, 4) | Semua layar 4 peran (export PDF Claude Design) — cara baca di bagian **Membaca desain** | Sebelum membuat UI |
 
 Jika kode dan dokumen bertentangan, **dokumen yang benar** — tanyakan dulu sebelum menyimpang. Jika ada aturan yang tidak tercakup dokumen, **jangan menebak: tanyakan**.
 
 ## Stack
 
-- **Frontend**: React (Vite), PWA. Deploy: Vercel.
-- **Backend**: Supabase — Auth, Postgres, Storage, Realtime, pg_cron, RPC/trigger, Edge Function (hanya untuk operasi yang butuh `service_role`, mis. membuat akun karyawan).
+- **Frontend**: React + TypeScript (Vite), PWA. Deploy: Vercel.
+- **Library terpilih**: React Router, TanStack Query, React Hook Form + Zod, Tailwind CSS, Vitest.
+- **Backend**: Supabase (region Singapore) — Auth, Postgres, Storage, Realtime, pg_cron, RPC/trigger, Edge Function (hanya untuk operasi yang butuh `service_role`, mis. membuat akun karyawan).
 - **PDF**: `@react-pdf/renderer` (slip & laporan). **Excel**: SheetJS.
-- Detail tooling (package manager, router, state management, UI library, testing) belum diputuskan — **tanyakan sebelum menambah dependency baru**.
+- Di luar library terpilih di atas, **tanyakan sebelum menambah dependency baru**.
 
 ## Cara bekerja (wajib)
 
@@ -67,7 +68,7 @@ Jika kode dan dokumen bertentangan, **dokumen yang benar** — tanyakan dulu seb
 - Lembur: diajukan sebelum lembur (hari kerja: ≤ jam pulang hari itu; hari libur: ≤ jam mulai lembur). Jam dibayar = min(aktual, disetujui). Upah sejam = gaji pokok ÷ 173 (dibulatkan ke rupiah). Pengali PP 35/2021 pola 6 hari kerja.
 - Payroll: periode 26–25, label bulan = bulan tanggal 25. Draft → Diajukan → (Revisi) → Final (terkunci).
 - Hari hadir = hari kerja yang punya absensi; lembur hari libur tidak menambah hari hadir.
-- Cuti: jatah sama untuk semua, reset 1 Januari (sisa hangus), karyawan baru proporsional; hanya cuti yang memotong saldo.
+- Cuti: jatah sama untuk semua, reset 1 Januari (sisa hangus), karyawan baru proporsional; hanya cuti (dan cuti bersama) yang memotong saldo; saldo tidak minus.
 
 ## Struktur repo (rencana)
 
@@ -86,7 +87,16 @@ Angka di desain sudah dihitung dan konsisten — gunakan sebagai kasus uji payro
 - Rina Wulandari, gaji pokok Rp 4.800.000, payroll November 2026 → pendapatan bersih **Rp 5.891.682**; Oktober 2026 → **Rp 5.507.225**.
 - Total 6 karyawan contoh November 2026 → bersih **Rp 34.747.379**.
 
-## Keputusan yang masih terbuka
+## Konteks lanjutan
 
-- Apakah cuti bersama memotong saldo cuti tahunan?
-- Tooling frontend (router, state, UI library, testing).
+Baca `docs/handoff.md` untuk status terakhir, alasan keputusan, daftar layar, dan urutan langkah berikutnya.
+
+## Membaca desain
+
+Desain ada di 6 PDF `design/HRIS PT. SMP — Batch *.pdf` (±245 layar, termasuk varian state). PDF-nya besar — **jangan membacanya sekaligus**.
+
+1. **Indeks dulu (sekali saja)**: bila `design/indeks-layar.md` belum ada, telusuri keenam PDF bertahap (maks. 20 halaman per baca) dan buat tabel `nama layar | peran | file | halaman`. Setelah itu selalu pakai indeks ini.
+2. **Baca hanya halaman yang relevan** dengan fitur yang sedang dikerjakan, termasuk varian state-nya (muat, kosong, galat, sukses). Contoh: mengerjakan ATT-01 → baca halaman layar Clock In dan variannya saja.
+3. **Nilai pasti** (warna, font, radius, tinggi kontrol, label badge status) ambil dari `docs/handoff.md` §4, bukan ditebak dari gambar.
+4. Jika gambar dan dokumen (PRD/handoff) berbeda, **dokumen yang benar** — sebutkan perbedaannya ke Al.
+5. Desain adalah acuan tampilan, bukan kode: tulis komponen React sendiri sesuai konvensi di atas.

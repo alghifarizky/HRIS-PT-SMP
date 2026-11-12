@@ -157,7 +157,8 @@ Prioritas: **P0** = wajib MVP, **P1** = penting, bisa menyusul di akhir MVP.
 | ID | Kebutuhan | Prioritas |
 |---|---|---|
 | MST-01 | HR mengatur jam masuk & pulang per hari (Senin–Sabtu) | P0 |
-| MST-02 | HR mengelola daftar tanggal merah | P0 |
+| MST-02 | HR mengelola daftar tanggal merah & cuti bersama (jenis dibedakan) | P0 |
+| LV-10 | Cuti bersama memotong saldo cuti otomatis (§6.7) | P0 |
 | MST-03 | HR mengatur jatah cuti tahunan | P0 |
 
 ---
@@ -201,6 +202,13 @@ Nilai gaji pokok & tarif disalin ke slip saat payroll dibuat.
 - Karyawan baru: jatah tahun berjalan = jatah tahunan × (jumlah bulan penuh tersisa ÷ 12), dibulatkan ke bawah.
   Contoh: jatah 12 hari, masuk 15 Maret → bulan penuh tersisa April–Desember = 9 → **9 hari**.
 
+### 6.7 Cuti bersama
+- HR menandai tanggal cuti bersama di master data hari libur (jenis = cuti bersama).
+- Cuti bersama **memotong saldo cuti tahunan** 1 hari per tanggal, otomatis untuk semua karyawan aktif (bukan Direksi).
+- Saldo tidak bisa minus: bila saldo 0, cuti bersama tetap berlaku tanpa potongan saldo.
+- Tanggal cuti bersama tidak dihitung sebagai hari kerja (tidak wajib absen, tidak dihitung dalam jumlah hari pengajuan cuti, tidak menjadi alpha).
+- Karyawan yang tetap diminta masuk pada tanggal itu: saldonya tidak dipotong dan dihitung hadir biasa (HR mengoreksi lewat absensi).
+
 ### 6.6 Status
 - Pengajuan: `menunggu` → `disetujui` / `ditolak` / `dibatalkan`
 - Payroll: `draft` → `diajukan` → (`revisi` → `diajukan`) → `final`
@@ -225,7 +233,8 @@ Nilai gaji pokok & tarif disalin ke slip saat payroll dibuat.
 
 | Lapisan | Pilihan |
 |---|---|
-| Frontend | React JS |
+| Frontend | React + TypeScript (Vite), React Router, TanStack Query, React Hook Form + Zod, Tailwind CSS |
+| Testing | Vitest (prioritas: rumus payroll, lembur, hari kerja, saldo cuti) |
 | Backend | Supabase: Auth, Postgres, Storage, Realtime, pg_cron, RPC/trigger |
 | PDF | `@react-pdf/renderer` (slip & laporan) |
 | Excel | SheetJS (laporan) |
@@ -262,6 +271,8 @@ Nilai gaji pokok & tarif disalin ke slip saat payroll dibuat.
 | Hosting | Vercel |
 | Karyawan resign | Akun dinonaktifkan, tidak bisa login; data tetap tersimpan |
 | Saldo cuti | Reset 1 Januari, sisa hangus, karyawan baru proporsional |
+| Cuti bersama | Memotong saldo cuti (saldo tidak minus) |
+| Region Supabase | Singapore (ap-southeast-1) |
 | Koreksi absensi HR | Masuk MVP |
 | Log audit | Masuk MVP |
 | 2FA HR & Direksi | Opsional di MVP, wajib sebelum go-live |

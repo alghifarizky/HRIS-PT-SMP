@@ -1,6 +1,6 @@
 # Spesifikasi — HRIS PT. SMP
 
-Stack: **React JS (web app responsif + PWA) + Supabase** (Auth, Postgres, Storage, Realtime, pg_cron). Hosting: Vercel.
+Stack: **React + TypeScript (Vite, web app responsif + PWA) + Supabase (region Singapore)** (Auth, Postgres, Storage, Realtime, pg_cron). Hosting: Vercel.
 Status: tahap desain selesai (UML + ERD). Berikutnya: setup Supabase.
 Dokumen terkait: `prd.md`, `security.md`.
 
@@ -63,6 +63,7 @@ Ditolak di tingkat mana pun → status langsung ditolak.
 - **Karyawan baru**: jatah = jatah tahunan × (bulan penuh tersisa ÷ 12), dibulatkan ke bawah. Contoh: jatah 12, masuk 15 Maret → 9 hari.
 - Hari dihitung **hari kerja saja** (Senin–Sabtu, tanpa tanggal merah).
 - Hanya **cuti** yang memotong saldo; sakit & izin tidak.
+- **Cuti bersama** (ditandai HR di `hari_libur` dengan `jenis = cuti_bersama`) memotong saldo 1 hari per tanggal untuk semua karyawan aktif; saldo tidak bisa minus; tanggal itu bukan hari kerja.
 - Saldo dicek saat pengajuan (kurang → ditolak sistem), dan **dikurangi setelah disetujui**.
 - Status pengajuan: menunggu, disetujui, ditolak, dibatalkan.
 
@@ -642,6 +643,7 @@ erDiagram
   }
   hari_libur {
     date tanggal PK
+    enum jenis "libur_nasional, cuti_bersama"
     text keterangan
   }
   pengaturan {
@@ -669,6 +671,7 @@ erDiagram
   - auto clock out — setiap tengah malam
   - reset saldo cuti — setiap 1 Januari
   - hapus selfie > 12 bulan — setiap bulan
+  - potong saldo cuti bersama — harian, untuk tanggal cuti bersama hari itu
 - **Storage**: bucket `selfie` & `lampiran` (privat, signed URL).
 - **Realtime**: notifikasi pengajuan, persetujuan, slip terbit.
 - **Auth**: tanpa sign up publik; akun dibuat HR via Edge Function; MFA (TOTP) HR & Direksi.
