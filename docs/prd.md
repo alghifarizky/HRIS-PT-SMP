@@ -63,7 +63,7 @@ Prioritas: **P0** = wajib MVP, **P1** = penting, bisa menyusul di akhir MVP.
 | ID | Kebutuhan | Prioritas |
 |---|---|---|
 | AUTH-01 | Pengguna login dengan email & password (Supabase Auth) | P0 |
-| AUTH-02 | Akun dibuat oleh HR, bukan registrasi mandiri | P0 |
+| AUTH-02 | Akun dibuat oleh HR (akun ber-peran HR dibuat oleh Direksi), bukan registrasi mandiri | P0 |
 | AUTH-03 | Pengguna dapat reset password | P0 |
 | AUTH-04 | Menu & halaman yang tampil sesuai peran | P0 |
 | AUTH-05 | Logout | P0 |
@@ -79,6 +79,7 @@ Prioritas: **P0** = wajib MVP, **P1** = penting, bisa menyusul di akhir MVP.
 | EMP-05 | Saldo cuti tampil di profil & form cuti | P0 |
 | EMP-06 | No. KTP selalu tersamar; HR & Direksi dapat menekan "Tampilkan" untuk melihat nomor lengkap, dan setiap tindakan ini tercatat di log audit | P0 |
 | EMP-07 | Status menikah: Belum menikah / Menikah | P0 |
+| EMP-08 | Direksi mengelola akun HR: membuat akun HR, mengubah peran ke/dari HR, menonaktifkan HR, dan mengubah data HR (termasuk gaji). Data karyawan lain tetap hanya-baca bagi Direksi. Tidak ada pengguna yang dapat mengubah peran atau status aktif akunnya sendiri; akun Direksi hanya dikelola developer | P0 |
 
 ### 5.3 Absensi
 | ID | Kebutuhan | Prioritas |
@@ -279,5 +280,6 @@ Nilai gaji pokok & tarif disalin ke slip saat payroll dibuat.
 | Masa simpan selfie | 12 bulan |
 | No. KTP | Dilindungi RLS + view terbatas (tanpa enkripsi tambahan); tampil tersamar, HR & Direksi bisa "Tampilkan" (tercatat di log audit) |
 | Karyawan nonaktif | Pengajuan Menunggu dibatalkan otomatis pada tanggal efektif |
+| Pergantian HR | Direksi (owner, satu orang) yang mengangkat, mengganti & menonaktifkan HR (EMP-08). HR tetap boleh mengubah gaji & saldo cuti miliknya sendiri — diawasi lewat persetujuan payroll Direksi & log audit |
 
 Belum ada pertanyaan terbuka.

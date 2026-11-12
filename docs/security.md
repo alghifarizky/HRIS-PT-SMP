@@ -41,7 +41,7 @@ Data pribadi karyawan tunduk pada **UU No. 27 Tahun 2022 tentang Pelindungan Dat
 ## 3. Autentikasi
 
 - **Supabase Auth**, email + password.
-- **Tidak ada registrasi mandiri.** Akun dibuat HR melalui Edge Function (memakai `service_role` di server), lalu karyawan menerima link set password.
+- **Tidak ada registrasi mandiri.** Akun dibuat HR (akun ber-peran HR dibuat Direksi) melalui Edge Function (memakai `service_role` di server), lalu karyawan menerima link set password.
 - Matikan "Enable sign ups" di pengaturan Auth Supabase.
 - Password minimal 8 karakter (atur di Auth settings).
 - Aktifkan proteksi brute force / rate limit bawaan Supabase Auth.
@@ -89,7 +89,7 @@ Keterangan: **R** baca, **C** buat, **U** ubah, **D** hapus, **sendiri** = baris
 
 | Tabel | Karyawan | Atasan | HR | Direksi |
 |---|---|---|---|---|
-| `pengguna` | R sendiri | R sendiri + bawahan (tanpa kolom sensitif) | R/C/U semua | R semua |
+| `pengguna` | R sendiri | R sendiri + bawahan (tanpa kolom sensitif) | R/C/U semua | R semua; C/U baris ber-peran HR & ubah peran ke/dari HR |
 | `absensi` | R sendiri, C sendiri, U jam keluar sendiri (via RPC) | + R bawahan | R semua, C/U koreksi (alasan wajib) | R semua |
 | `pengajuan_lembur` | R/C sendiri, U → `dibatalkan` saat `menunggu` | + R bawahan | R semua | R semua |
 | `pengajuan_cuti` | sama seperti lembur | + R bawahan | R semua | R semua |
@@ -110,7 +110,10 @@ RLS bekerja per **baris**, bukan per kolom. Agar Atasan tidak melihat `no_ktp` &
 - Di UI, `no_ktp` **selalu tersamar**. HR & Direksi dapat menekan "Tampilkan"; nomor lengkap diambil lewat RPC `lihat_ktp(pengguna_id)` yang memeriksa peran pemanggil dan mencatat aksi `lihat_ktp` ke `log_audit` (tanpa menyimpan nomornya).
 
 ### 4.5 Aturan yang ditegakkan trigger (bukan hanya UI)
-- Karyawan tidak bisa mengubah kolom `role`, `atasan_id`, `gaji_pokok`, `saldo_cuti` miliknya.
+- Karyawan & Atasan tidak bisa mengubah baris `pengguna` miliknya (tanpa policy UPDATE).
+- Tidak ada pengguna yang bisa mengubah `role` / `aktif` barisnya sendiri. HR boleh mengubah `gaji_pokok` & `saldo_cuti` miliknya (diawasi persetujuan payroll Direksi + `log_audit`).
+- Direksi hanya boleh mengubah baris yang ber-peran HR sebelum atau sesudah perubahan (angkat / ganti / nonaktifkan HR).
+- Peran `direksi` tidak bisa diberikan atau dicabut dari aplikasi; akun Direksi hanya dikelola developer.
 - Clock in hanya sekali per hari (UNIQUE `pengguna_id, tanggal`); jam diisi `now()` server, nilai dari client diabaikan.
 - Pengajuan lembur ditolak jika dibuat setelah batas waktu: jam pulang (hari kerja) atau jam mulai lembur (hari libur).
 - Pengaju tidak bisa menjadi penyetuju pengajuannya sendiri.
@@ -184,7 +187,8 @@ RLS bekerja per **baris**, bukan per kolom. Agar Atasan tidak melihat `no_ktp` &
 
 - [ ] RLS aktif di semua tabel `public` (Security Advisor tanpa peringatan)
 - [ ] Uji akses per peran: karyawan A tidak bisa baca absensi / slip / profil karyawan B
-- [ ] Karyawan tidak bisa mengubah `role` / `gaji_pokok` / `saldo_cuti` sendiri
+- [ ] Karyawan tidak bisa mengubah `role` / `gaji_pokok` / `saldo_cuti` sendiri; tidak ada yang bisa mengubah `role` / `aktif` sendiri
+- [ ] Direksi hanya bisa mengubah baris HR; peran `direksi` tidak bisa diberikan dari aplikasi
 - [ ] Atasan tidak bisa membaca `no_ktp` & `gaji_pokok` bawahan
 - [ ] Payroll `final` tidak bisa diubah (uji UPDATE langsung via API)
 - [ ] Pengaju tidak bisa menyetujui pengajuannya sendiri
@@ -204,5 +208,6 @@ RLS bekerja per **baris**, bukan per kolom. Agar Atasan tidak melihat `no_ktp` &
 |---|---|
 | Log audit | Masuk MVP (§10) |
 | 2FA HR & Direksi | Opsional di MVP, wajib sebelum go-live (§3) |
+| Pergantian HR | Direksi mengelola akun HR (PRD EMP-08, §4.3, §4.5) |
 | Retensi selfie | 12 bulan, dihapus otomatis (§5) |
 | No. KTP | RLS + view terbatas, tanpa enkripsi tambahan (§4.4) |

@@ -13,7 +13,7 @@ Dokumen terkait: `prd.md`, `security.md`.
 | Karyawan | Pengguna | Clock in/out (selfie), riwayat absensi, ajukan lembur & cuti/sakit/izin, batalkan pengajuan (selama menunggu), lihat status, unduh slip gaji |
 | Atasan | Karyawan | + Persetujuan tingkat 1 untuk pengajuan bawahan, lihat absensi tim |
 | HR / Admin | Karyawan | + Persetujuan tingkat 2, kelola data karyawan, koreksi absensi, kelola master data, proses payroll, lihat & unduh semua laporan |
-| Direksi | Pengguna | Tidak clock in, tidak menerima slip. Menyetujui pengajuan Atasan & HR, menyetujui payroll, lihat & unduh semua laporan |
+| Direksi | Pengguna | Tidak clock in, tidak menerima slip. Menyetujui pengajuan Atasan & HR, menyetujui payroll, lihat & unduh semua laporan, mengelola akun HR (angkat / ganti / nonaktifkan) |
 
 **Alur persetujuan (lembur & cuti sama):**
 
@@ -674,6 +674,6 @@ erDiagram
   - potong saldo cuti bersama — harian, untuk tanggal cuti bersama hari itu
 - **Storage**: bucket `selfie` & `lampiran` (privat, signed URL).
 - **Realtime**: notifikasi pengajuan, persetujuan, slip terbit.
-- **Auth**: tanpa sign up publik; akun dibuat HR via Edge Function; MFA (TOTP) HR & Direksi.
+- **Auth**: tanpa sign up publik; akun dibuat HR via Edge Function (akun HR dibuat Direksi); MFA (TOTP) HR & Direksi.
 - **RLS**: lihat `security.md`.
 - **Frontend export**: slip & laporan PDF via `@react-pdf/renderer`, laporan Excel via SheetJS.
