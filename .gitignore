@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Desain (PDF besar, disimpan di luar Git; indeks layar tetap di-commit)
+design/*.pdf
