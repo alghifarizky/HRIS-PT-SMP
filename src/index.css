@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+/* Token design system — nilai dari docs/handoff.md §4 */
+@theme {
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-primer: #1E4FD8;
+  --color-latar: #F5F7FA;
+  --color-teks: #0F172A;
+  --color-teks-sekunder: #475569;
+  --color-garis: #E2E8F0;
+  --radius-kontrol: 8px;
+  --radius-kartu: 12px;
+}
+
+body {
+  @apply bg-latar text-teks font-sans;
+}
