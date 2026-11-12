@@ -1,17 +1,16 @@
-import type { ReactNode } from 'react'
-import { createBrowserRouter, Navigate, RouterProvider } from 'react-router'
+import type { ComponentType, ReactNode } from 'react'
+import { createBrowserRouter, Navigate, Outlet, RouterProvider, type RouteObject } from 'react-router'
 import { supabase } from './lib/supabase'
-import { useProfil, useSesi } from './auth/sesi'
-import Masuk from './halaman/Masuk'
-import LupaPassword from './halaman/LupaPassword'
-import AturPassword from './halaman/AturPassword'
-import BerandaSementara from './halaman/BerandaSementara'
+import { useProfil, useSesi, type Peran } from './auth/sesi'
+import { AKSES, halamanAwal } from './navigasi'
+import Segera from './halaman/Segera'
+import Beranda from './halaman/Beranda'
 
 // Route guard hanya untuk UX — keamanan sebenarnya di RLS.
-function HanyaTamu({ children }: { children: ReactNode }) {
+function HanyaTamu() {
   const sesi = useSesi()
   if (sesi === undefined) return <LayarMemuat />
-  return sesi ? <Navigate to="/" replace /> : children
+  return sesi ? <Navigate to="/" replace /> : <Outlet />
 }
 
 function WajibMasuk() {
@@ -22,15 +21,60 @@ function WajibMasuk() {
   if (profil.isError) return <LayarPesan judul="Data akun gagal dimuat" pesan="Periksa koneksi internet Anda, lalu coba lagi." aksi="Coba lagi" onAksi={() => profil.refetch()} />
   if (!profil.data)
     return <LayarPesan judul="Akun tidak aktif" pesan="Akun Anda belum terdaftar atau sudah dinonaktifkan. Hubungi HR." aksi="Keluar" onAksi={() => supabase.auth.signOut()} />
-  return <BerandaSementara profil={profil.data} />
+  return <Outlet />
 }
 
+function HanyaPeran({ peran, children }: { peran: Peran[]; children: ReactNode }) {
+  const role = useProfil().data!.role
+  return peran.includes(role) ? children : <Navigate to={halamanAwal(role)} replace />
+}
+
+function KeHalamanAwal() {
+  return <Navigate to={halamanAwal(useProfil().data!.role)} replace />
+}
+
+const lazyHalaman = (muat: () => Promise<{ default: ComponentType }>) => async () => ({ Component: (await muat()).default })
+
+function TombolKeluar() {
+  return (
+    <button type="button" onClick={() => supabase.auth.signOut()} className="fokus-ring mt-6 h-12 w-full rounded-kontrol border border-garis bg-permukaan font-semibold text-bahaya">
+      Keluar
+    </button>
+  )
+}
+
+/** Satu rute per halaman di AKSES; isi sementara "Segera hadir", kecuali beranda/dashboard. */
+const ruteDari = (pilih: (ke: string) => boolean): RouteObject[] =>
+  Object.entries(AKSES)
+    .filter(([ke]) => pilih(ke))
+    .map(([ke, { label, peran }]) => ({
+      path: ke,
+      element: (
+        <HanyaPeran peran={peran}>
+          {ke === '/beranda' || ke === '/panel' ? <Beranda /> : <Segera judul={label}>{ke.endsWith('/profil') && <TombolKeluar />}</Segera>}
+        </HanyaPeran>
+      ),
+    }))
+
 const router = createBrowserRouter([
-  { path: '/masuk', element: <HanyaTamu><Masuk /></HanyaTamu> },
-  { path: '/lupa-password', element: <HanyaTamu><LupaPassword /></HanyaTamu> },
-  // Terbuka untuk tamu maupun yang sudah login: link email membuat sesi sebelum halaman tampil
-  { path: '/atur-password', element: <AturPassword /> },
-  { path: '/', element: <WajibMasuk /> },
+  {
+    element: <HanyaTamu />,
+    children: [
+      { path: '/masuk', lazy: lazyHalaman(() => import('./halaman/Masuk')) },
+      { path: '/lupa-password', lazy: lazyHalaman(() => import('./halaman/LupaPassword')) },
+    ],
+  },
+  // Terbuka untuk tamu maupun yang sudah login: link email membawa token untuk dipakai di halaman ini
+  { path: '/atur-password', lazy: lazyHalaman(() => import('./halaman/AturPassword')) },
+  {
+    path: '/',
+    element: <WajibMasuk />,
+    children: [
+      { index: true, element: <KeHalamanAwal /> },
+      { lazy: lazyHalaman(() => import('./layout/LayoutMobile')), children: ruteDari((ke) => !ke.startsWith('/panel')) },
+      { lazy: lazyHalaman(() => import('./layout/LayoutPanel')), children: ruteDari((ke) => ke.startsWith('/panel')) },
+    ],
+  },
   { path: '*', element: <Navigate to="/" replace /> },
 ])
 

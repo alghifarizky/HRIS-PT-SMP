@@ -48,18 +48,18 @@ export default function LupaPassword() {
     <HalamanAuth kembaliKe="/masuk">
       <h1 className="text-[28px] leading-[34px] font-bold">Lupa password</h1>
       <p className="mt-2 text-[15px] leading-[22px] text-teks-sekunder">
-        Masukkan email kantor Anda. Kami akan mengirim link untuk membuat password baru.
+        Masukkan email yang terdaftar di aplikasi. Kami akan mengirim link untuk membuat password baru.
       </p>
       <form onSubmit={kirim} noValidate className="mt-8 flex flex-col gap-6">
         {galat && <BannerGalat>{galat}</BannerGalat>}
         <Field id="email" label="Email" galat={errors.email?.message}>
-          <Input id="email" type="email" autoComplete="username" inputMode="email" placeholder="nama@ptsmp.co.id" galat={!!errors.email} {...register('email')} />
+          <Input id="email" type="email" autoComplete="username" inputMode="email" placeholder="nama@gmail.com" galat={!!errors.email} {...register('email')} />
         </Field>
         <TombolPrimer type="submit" memproses={isSubmitting}>
           Kirim link reset
         </TombolPrimer>
       </form>
-      <p className="mt-6 text-[15px] leading-[22px] text-teks-sekunder">Tidak punya akses ke email kantor? Hubungi HR untuk reset manual.</p>
+      <p className="mt-6 text-[15px] leading-[22px] text-teks-sekunder">Tidak bisa membuka email tersebut? Hubungi HR untuk reset manual.</p>
     </HalamanAuth>
   )
 }

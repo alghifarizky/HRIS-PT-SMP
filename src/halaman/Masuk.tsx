@@ -1,4 +1,5 @@
-// AUTH-01 — desain: Batch 1 hal 6 (normal) & 7 (error kredensial)
+// AUTH-01 — desain: Batch 1 hal 6 (normal) & 7 (error kredensial). Teks disesuaikan: karyawan login
+// dengan email pribadi yang didaftarkan HR, bukan email kantor (keputusan Al, 13 Nov 2026).
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -32,14 +33,16 @@ export default function Masuk() {
 
   return (
     <HalamanAuth>
-      <div className="flex size-14 items-center justify-center rounded-2xl bg-primer text-lg font-bold text-white">SMP</div>
+      {/* Logo resmi menggantikan kotak "SMP" di desain (keputusan Al, 13 Nov 2026) */}
+      <img src="/logo-smp.png" alt="Logo PT. Sumber Migas Pantara" width={56} height={56} className="size-14" />
+
       <h1 className="mt-6 text-[28px] leading-[34px] font-bold">HRIS PT. SMP</h1>
-      <p className="mt-2 text-[15px] leading-[22px] text-teks-sekunder">Masuk dengan akun yang dibuatkan HR.</p>
+      <p className="mt-2 text-[15px] leading-[22px] text-teks-sekunder">Masuk dengan email pribadi yang sudah didaftarkan HR.</p>
 
       <form onSubmit={masuk} noValidate className="mt-8 flex flex-col gap-4">
         {galat && <BannerGalat>{galat}</BannerGalat>}
         <Field id="email" label="Email" galat={errors.email?.message}>
-          <Input id="email" type="email" autoComplete="username" inputMode="email" placeholder="nama@ptsmp.co.id" galat={!!errors.email} {...register('email')} />
+          <Input id="email" type="email" autoComplete="username" inputMode="email" placeholder="nama@gmail.com" galat={!!errors.email} {...register('email')} />
         </Field>
         <Field id="password" label="Password" galat={errors.password?.message}>
           <InputPassword
@@ -59,7 +62,7 @@ export default function Masuk() {
       </form>
 
       <footer className="mt-auto pt-12 text-center">
-        <p className="text-[15px] text-teks-sekunder">Belum punya akun? Akun karyawan dibuat oleh HR.</p>
+        <p className="text-[15px] text-teks-sekunder">Email belum terdaftar? Hubungi HR.</p>
         {/* shortcut: versi ditulis manual, ambil dari package.json saat ada proses rilis */}
         <p className="mt-2 text-sm text-teks-3">Versi 1.0.0</p>
       </footer>
