@@ -13,7 +13,7 @@ import { Badge, KeadaanGalat, KeadaanKosong, Skeleton } from '../../komponen/kea
 import Dialog from '../../komponen/Dialog'
 import { useToast } from '../../komponen/toast'
 import { useDaftarKaryawan, useKaryawan, type DetailKaryawan as Detail } from './data'
-import { uraikanLog, type BarisLog } from './riwayat'
+import { uraikanLog, type BarisLog } from '../../lib/audit'
 import { LABEL_ALASAN_NONAKTIF } from './label'
 import { DialogAktifkanKembali, DialogBatalNonaktif, DialogNonaktifkan } from './DialogNonaktif'
 import { HEADER_ALASAN, kodeAlasan } from '../../lib/alasan'

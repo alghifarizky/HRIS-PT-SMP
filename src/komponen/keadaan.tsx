@@ -47,6 +47,7 @@ const NADA = {
   bahaya: 'bg-bahaya-latar text-bahaya',
   info: 'bg-info-latar text-info',
   netral: 'bg-latar text-teks-sekunder',
+  ungu: 'bg-ungu-latar text-ungu',
 }
 
 /** Badge status: selalu titik + label (status tidak hanya warna). */

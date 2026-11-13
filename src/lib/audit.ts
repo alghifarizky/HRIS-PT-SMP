@@ -1,8 +1,8 @@
-// Menerjemahkan baris log_audit tabel `pengguna` menjadi kalimat untuk tab Riwayat perubahan (B3A hal 18).
-import { LABEL_PERAN } from '../../navigasi'
-import { dariTanggalDb, rupiah, tanggalPendek } from '../../lib/format'
-import type { Peran } from '../../auth/sesi'
-import { LABEL_ALASAN_NONAKTIF, type AlasanNonaktif } from './label'
+// Menerjemahkan baris log_audit menjadi kalimat — tab Riwayat perubahan (B3A hal 18) & layar Log audit (B3C hal 16–18).
+import { LABEL_PERAN } from '../navigasi'
+import { dariTanggalDb, rupiah, tanggalPendek } from './format'
+import type { Peran } from '../auth/sesi'
+import { LABEL_ALASAN_NONAKTIF, type AlasanNonaktif } from '../halaman/karyawan/label'
 
 export type BarisLog = { aksi: 'insert' | 'update' | 'delete' | 'lihat_ktp'; nilai_lama: Record<string, unknown> | null; nilai_baru: Record<string, unknown> | null }
 export type Perubahan = { label: string; lama: string; baru: string }
@@ -12,6 +12,9 @@ const LABEL: Record<string, string> = {
   jabatan: 'Jabatan', tanggal_lahir: 'Tanggal lahir', alamat: 'Alamat', tanggal_masuk: 'Tanggal masuk', no_ktp: 'No. KTP',
   status_menikah: 'Status menikah', jumlah_tanggungan: 'Jumlah tanggungan', gaji_pokok: 'Gaji pokok', saldo_cuti: 'Saldo cuti',
   tanggal_nonaktif: 'Aktif sampai', alasan_nonaktif: 'Alasan nonaktif', catatan_nonaktif: 'Catatan nonaktif',
+  // master data
+  tanggal: 'Tanggal', jenis: 'Jenis', keterangan: 'Keterangan', jam_masuk: 'Jam masuk', jam_pulang: 'Jam pulang',
+  jatah_cuti_tahunan: 'Jatah cuti tahunan', tanggal_cut_off: 'Tanggal cut-off',
 }
 const ABAIKAN = new Set(['id', 'no_ktp_tersamar']) // no_ktp_tersamar menggandakan no_ktp (sudah tersamar di log)
 
@@ -23,22 +26,32 @@ function nilai(kunci: string, v: unknown, namaPengguna: (id: string) => string):
     case 'atasan_id': return namaPengguna(String(v))
     case 'gaji_pokok': return rupiah(Number(v))
     case 'saldo_cuti': return `${v} hari`
-    case 'tanggal_lahir': case 'tanggal_masuk': case 'tanggal_nonaktif': return tanggalPendek(dariTanggalDb(String(v)))
+    case 'tanggal_lahir': case 'tanggal_masuk': case 'tanggal_nonaktif': case 'tanggal': return tanggalPendek(dariTanggalDb(String(v)))
+    case 'jam_masuk': case 'jam_pulang': return String(v).slice(0, 5)
+    case 'jatah_cuti_tahunan': return `${v} hari`
+    case 'tanggal_cut_off': return `tanggal ${v}`
+    case 'jenis': return v === 'cuti_bersama' ? 'Cuti bersama' : v === 'libur_nasional' ? 'Libur nasional' : String(v)
     case 'alasan_nonaktif': return LABEL_ALASAN_NONAKTIF[v as AlasanNonaktif] ?? String(v)
     case 'status_menikah': return v === 'menikah' ? 'Menikah' : 'Belum menikah'
     default: return String(v)
   }
 }
 
-/** Judul satu entri + daftar perubahan per kolom (urutan mengikuti LABEL). */
-export function uraikanLog(log: BarisLog, namaPengguna: (id: string) => string): { judul: string; perubahan: Perubahan[] } {
+/** Judul satu entri + daftar perubahan per kolom (urutan mengikuti LABEL). `tabel` default 'pengguna'. */
+export function uraikanLog(log: BarisLog, namaPengguna: (id: string) => string, tabel = 'pengguna'): { judul: string; perubahan: Perubahan[] } {
   if (log.aksi === 'lihat_ktp') return { judul: 'Melihat No. KTP', perubahan: [] }
-  if (log.aksi === 'insert') return { judul: 'Akun dibuat', perubahan: [] }
-  if (log.aksi === 'delete') return { judul: 'Data dihapus', perubahan: [] }
+  if (log.aksi === 'insert' && tabel === 'pengguna') return { judul: 'Akun dibuat', perubahan: [] }
   const lama = log.nilai_lama ?? {}
   const baru = log.nilai_baru ?? {}
+  const sumber = log.aksi === 'delete' ? lama : baru
   const perubahan = Object.keys(LABEL)
-    .filter((k) => k in baru && !ABAIKAN.has(k))
-    .map((k) => ({ label: LABEL[k], lama: nilai(k, lama[k], namaPengguna), baru: nilai(k, baru[k], namaPengguna) }))
+    .filter((k) => k in sumber && !ABAIKAN.has(k))
+    .map((k) => ({
+      label: LABEL[k],
+      lama: log.aksi === 'insert' ? '—' : nilai(k, lama[k], namaPengguna),
+      baru: log.aksi === 'delete' ? '—' : nilai(k, baru[k], namaPengguna),
+    }))
+  if (log.aksi === 'insert') return { judul: 'Menambah data', perubahan }
+  if (log.aksi === 'delete') return { judul: 'Menghapus data', perubahan }
   return { judul: perubahan.length === 1 ? `Mengubah ${perubahan[0].label.toLowerCase()}` : 'Mengubah data', perubahan }
 }

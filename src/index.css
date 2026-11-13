@@ -30,6 +30,9 @@
   --color-info: #1E40AF;
   --color-info-latar: #DBEAFE;
   --color-info-ikon: #1D4ED8;
+  /* Ungu: badge "Dikoreksi HR" / "Lihat No. KTP" di desain; nilai tidak ada di handoff §4 — perkiraan (Tailwind purple) */
+  --color-ungu: #6B21A8;
+  --color-ungu-latar: #F3E8FF;
 
   --radius-kontrol: 8px;
   --radius-kartu: 12px;
