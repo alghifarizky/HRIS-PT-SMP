@@ -1,6 +1,8 @@
 -- Uji RLS, trigger & constraint tabel pengguna. Jalankan: npx supabase test db
 begin;
 select plan(30);
+-- Seed lama tidak mengisi tanggal_masuk (wajib sejak trigger saldo awal); default hanya di transaksi uji
+alter table public.pengguna alter column tanggal_masuk set default '2020-01-01';
 
 -- Seed (sebagai postgres, melewati RLS)
 insert into auth.users (id, email) values

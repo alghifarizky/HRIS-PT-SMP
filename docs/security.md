@@ -190,6 +190,7 @@ RLS bekerja per **baris**, bukan per kolom. Agar Atasan tidak melihat `no_ktp` &
 - [ ] Karyawan tidak bisa mengubah `role` / `gaji_pokok` / `saldo_cuti` sendiri; tidak ada yang bisa mengubah `role` / `aktif` sendiri
 - [ ] Direksi hanya bisa mengubah baris HR; peran `direksi` tidak bisa diberikan dari aplikasi
 - [ ] SMTP memakai Gmail khusus aplikasi (bukan akun pribadi); app password tidak ada di repo; `site_url` & redirect URL diganti ke domain production
+- [ ] Secret Edge Function `APP_ORIGINS` berisi domain production (Supabase tidak menolak `redirect_to` di luar allow-list saat undangan — fungsi `akun` yang menolaknya)
 - [ ] Atasan tidak bisa membaca `no_ktp` & `gaji_pokok` bawahan
 - [ ] Payroll `final` tidak bisa diubah (uji UPDATE langsung via API)
 - [ ] Pengaju tidak bisa menyetujui pengajuannya sendiri
@@ -210,6 +211,7 @@ RLS bekerja per **baris**, bukan per kolom. Agar Atasan tidak melihat `no_ktp` &
 | Log audit | Masuk MVP (§10) |
 | 2FA HR & Direksi | Opsional di MVP, wajib sebelum go-live (§3) |
 | Pergantian HR | Direksi mengelola akun HR (PRD EMP-08, §4.3, §4.5) |
+| Edge Function `akun` | `service_role` hanya untuk Auth admin (undang, kirim ulang, ubah email); baris `pengguna` ditulis dengan token pemanggil agar RLS & log audit berlaku. Data divalidasi ulang di server sebelum email terkirim; akun Auth dihapus bila penyimpanan gagal |
 | Pengirim email (undangan & reset password) | SMTP Gmail khusus aplikasi `hris.ptsmp@gmail.com` (kantor tanpa domain). App password hanya di `supabase/.env` (gitignore) & config Supabase; akun wajib 2FA, kode pemulihan disimpan aman. Link email memakai `token_hash` (dipakai saat pengguna menyimpan password, tahan pemindai link) |
 | Retensi selfie | 12 bulan, dihapus otomatis (§5) |
 | No. KTP | RLS + view terbatas, tanpa enkripsi tambahan (§4.4) |

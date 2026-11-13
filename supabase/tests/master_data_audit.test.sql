@@ -1,6 +1,8 @@
 -- Uji master data, log audit & lihat_ktp. Jalankan: npx supabase test db
 begin;
 select plan(31);
+-- Seed lama tidak mengisi tanggal_masuk (wajib sejak trigger saldo awal); default hanya di transaksi uji
+alter table public.pengguna alter column tanggal_masuk set default '2020-01-01';
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-00000000000d', 'direksi@smp.test'),
