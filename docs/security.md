@@ -210,7 +210,7 @@ RLS bekerja per **baris**, bukan per kolom. Agar Atasan tidak melihat `no_ktp` &
 |---|---|
 | Log audit | Masuk MVP (§10) |
 | 2FA HR & Direksi | Opsional di MVP, wajib sebelum go-live (§3) |
-| Pergantian HR | Direksi mengelola akun HR (PRD EMP-08, §4.3, §4.5) |
+| Pergantian HR | Normal: serah terima antar-HR; darurat: Direksi menjadikan karyawan HR / menonaktifkan HR (PRD EMP-08, §4.3, §4.5) |
 | Edge Function `akun` | `service_role` hanya untuk Auth admin (undang, kirim ulang, ubah email); baris `pengguna` ditulis dengan token pemanggil agar RLS & log audit berlaku. Data divalidasi ulang di server sebelum email terkirim; akun Auth dihapus bila penyimpanan gagal |
 | Pengirim email (undangan & reset password) | SMTP Gmail khusus aplikasi `hris.ptsmp@gmail.com` (kantor tanpa domain). App password hanya di `supabase/.env` (gitignore) & config Supabase; akun wajib 2FA, kode pemulihan disimpan aman. Link email memakai `token_hash` (dipakai saat pengguna menyimpan password, tahan pemindai link) |
 | Retensi selfie | 12 bulan, dihapus otomatis (§5) |

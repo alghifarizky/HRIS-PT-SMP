@@ -79,7 +79,7 @@ Prioritas: **P0** = wajib MVP, **P1** = penting, bisa menyusul di akhir MVP.
 | EMP-05 | Saldo cuti tampil di profil & form cuti | P0 |
 | EMP-06 | No. KTP selalu tersamar; HR & Direksi dapat menekan "Tampilkan" untuk melihat nomor lengkap, dan setiap tindakan ini tercatat di log audit | P0 |
 | EMP-07 | Status menikah: Belum menikah / Menikah | P0 |
-| EMP-08 | Direksi mengelola akun HR: membuat akun HR, mengubah peran ke/dari HR, menonaktifkan HR, dan mengubah data HR (termasuk gaji). Data karyawan lain tetap hanya-baca bagi Direksi. Tidak ada pengguna yang dapat mengubah peran atau status aktif akunnya sendiri; akun Direksi hanya dikelola developer | P0 |
+| EMP-08 | **Pergantian HR — alur normal: serah terima antar-HR.** HR lama mendaftarkan HR baru (langsung peran HR, atau mengubah peran karyawan yang ada menjadi HR); setelah transisi, HR baru menonaktifkan HR lama. **Jalur darurat** (HR keluar tanpa serah terima): Direksi dapat menjadikan karyawan yang ada sebagai HR dan menonaktifkan HR dari halaman detail karyawan — tanpa tombol tambah karyawan bagi Direksi. Di database Direksi juga berwenang membuat akun HR & mengubah data HR (termasuk gaji); data karyawan lain hanya-baca bagi Direksi. Tidak ada pengguna yang dapat mengubah peran atau status aktif akunnya sendiri; akun Direksi hanya dikelola developer | P0 |
 
 ### 5.3 Absensi
 | ID | Kebutuhan | Prioritas |
@@ -282,6 +282,6 @@ Nilai gaji pokok & tarif disalin ke slip saat payroll dibuat.
 | Karyawan nonaktif | Pengajuan Menunggu dibatalkan otomatis pada tanggal efektif |
 | Email aplikasi | Dikirim dari Gmail khusus aplikasi (`hris.ptsmp@gmail.com`) lewat SMTP; karyawan login dengan email pribadi masing-masing (satu email per orang). Notifikasi harian di dalam aplikasi, bukan email |
 | Jadwal kerja | Perubahan jadwal oleh HR langsung berlaku (bukan mulai hari berikutnya seperti teks desain) dan tercatat di log audit |
-| Pergantian HR | Direksi (owner, satu orang) yang mengangkat, mengganti & menonaktifkan HR (EMP-08). HR tetap boleh mengubah gaji & saldo cuti miliknya sendiri — diawasi lewat persetujuan payroll Direksi & log audit |
+| Pergantian HR | Normal: serah terima antar-HR (HR lama mendaftarkan HR baru, HR baru menonaktifkan HR lama). Darurat: Direksi (owner) menjadikan karyawan sebagai HR & menonaktifkan HR dari detail karyawan (keputusan Al, 13 Nov 2026). HR tetap boleh mengubah gaji & saldo cuti miliknya sendiri — diawasi lewat persetujuan payroll Direksi & log audit |
 
 Belum ada pertanyaan terbuka.

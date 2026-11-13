@@ -1,7 +1,7 @@
 // Shell panel HR & Direksi — desain B3A hal 3, B4 hal 1 (≥ 1024 px) & B4 hal 46 (Direksi < 1024 px).
 // HR di layar kecil diarahkan ke "Akun saya" (keputusan Al, 13 Nov 2026 — panel HR tidak punya desain mobile).
-import { Link, NavLink, Outlet, useLocation } from 'react-router'
-import { Laptop, LogOut, User } from 'lucide-react'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
+import { Laptop, LogOut, Search, User } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useProfil } from '../auth/sesi'
 import { AKSES, LABEL_PERAN, NAV_PANEL, NAV_PANEL_BAWAH, NAV_PANEL_MOBILE_DIREKSI, type ItemNav } from '../navigasi'
@@ -62,8 +62,8 @@ export default function LayoutPanel() {
       <div className="min-w-0 flex-1">
         <header className="sticky top-0 z-10 hidden h-16 items-center justify-between border-b border-garis bg-permukaan px-8 lg:flex">
           <p className="text-[22px] leading-7 font-semibold">{judul}</p>
-          {/* shortcut: kolom "Cari karyawan" menyusul bersama daftar karyawan (EMP-01, Fase 2) */}
           <div className="flex items-center gap-4">
+            <CariKaryawan />
             <TombolNotifikasi ke="/panel/notifikasi" />
             <div className="flex items-center gap-3">
               <span className="flex size-10 items-center justify-center rounded-full bg-primer-100 text-sm font-semibold text-primer" aria-hidden>
@@ -119,5 +119,31 @@ function PanelHrLayarKecil() {
         Keluar
       </button>
     </main>
+  )
+}
+
+/** Kolom "Cari karyawan (nama / NIK)" di top bar → membuka daftar karyawan dengan kata kunci. */
+function CariKaryawan() {
+  const navigate = useNavigate()
+  return (
+    <form
+      role="search"
+      onSubmit={(e) => {
+        e.preventDefault()
+        const q = String(new FormData(e.currentTarget).get('q') ?? '').trim()
+        navigate(q ? `/panel/karyawan?q=${encodeURIComponent(q)}` : '/panel/karyawan')
+        e.currentTarget.reset()
+      }}
+      className="relative"
+    >
+      <Search className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-teks-3" aria-hidden />
+      <input
+        name="q"
+        type="search"
+        aria-label="Cari karyawan (nama atau NIK)"
+        placeholder="Cari karyawan (nama / NIK)"
+        className="fokus-ring h-11 w-[320px] rounded-kontrol border border-garis bg-permukaan pr-3 pl-10 text-[15px] placeholder:text-teks-3"
+      />
+    </form>
   )
 }
