@@ -17,6 +17,9 @@ const HALAMAN: Record<string, ComponentType> = {
   '/panel/karyawan/:id/edit': lazy(() => import('./halaman/karyawan/EditKaryawan')),
   '/panel/karyawan/:id': lazy(() => import('./halaman/karyawan/DetailKaryawan')),
   '/panel/log-audit': lazy(() => import('./halaman/log-audit/LogAudit')),
+  '/profil': lazy(() => import('./halaman/profil/ProfilSaya')),
+  '/panel/profil': lazy(() => import('./halaman/profil/ProfilSaya')),
+  '/ganti-password': lazy(() => import('./halaman/profil/GantiPassword')),
 }
 
 // Route guard hanya untuk UX — keamanan sebenarnya di RLS.
@@ -48,18 +51,10 @@ function KeHalamanAwal() {
 
 const lazyHalaman = (muat: () => Promise<{ default: ComponentType }>) => async () => ({ Component: (await muat()).default })
 
-function TombolKeluar() {
-  return (
-    <button type="button" onClick={() => supabase.auth.signOut()} className="fokus-ring mt-6 h-12 w-full rounded-kontrol border border-garis bg-permukaan font-semibold text-bahaya">
-      Keluar
-    </button>
-  )
-}
-
 function halaman(ke: string, label: string) {
   const Halaman = HALAMAN[ke]
   if (Halaman) return <Halaman />
-  return <Segera judul={label}>{ke.endsWith('/profil') && <TombolKeluar />}</Segera>
+  return <Segera judul={label} />
 }
 
 /** Satu rute per halaman di AKSES. */

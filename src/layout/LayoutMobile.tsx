@@ -1,15 +1,17 @@
 // Shell mobile: Karyawan, Atasan, dan "Akun saya" HR — desain B1 hal 10, B2 hal 1.
-import { Link, Outlet } from 'react-router'
+import { Link, Outlet, useLocation } from 'react-router'
 import { useProfil } from '../auth/sesi'
 import { NAV_MOBILE } from '../navigasi'
-import { BottomNav, TopBarMobile } from './bagian'
+import { BottomNav, judulMobile, TopBarMobile } from './bagian'
 
 export default function LayoutMobile() {
   const { role } = useProfil().data!
+  const { pathname } = useLocation()
   return (
     <div className="min-h-dvh bg-latar">
       <TopBarMobile
         ke="/notifikasi"
+        judul={judulMobile(pathname)}
         ekstra={
           // Tidak ada di desain: jalan pulang HR dari "Akun saya" ke panel
           role === 'hr' && (

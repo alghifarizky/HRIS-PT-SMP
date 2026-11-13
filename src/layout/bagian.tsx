@@ -1,10 +1,14 @@
 // Potongan kerangka yang dipakai shell mobile & panel.
 import type { ReactNode } from 'react'
-import { Link, NavLink } from 'react-router'
+import { Link, matchPath, NavLink } from 'react-router'
 import { Bell } from 'lucide-react'
-import type { ItemNav } from '../navigasi'
+import { AKSES, type ItemNav } from '../navigasi'
 
 const ROOT = ['/beranda', '/panel']
+
+/** Judul top bar mobile dari label halaman; beranda → "HRIS PT. SMP" (B1 hal 10 vs hal 49). */
+export const judulMobile = (pathname: string) =>
+  ROOT.includes(pathname) ? 'HRIS PT. SMP' : (Object.entries(AKSES).find(([ke]) => matchPath(ke, pathname))?.[1].label ?? 'HRIS PT. SMP')
 
 /** Bottom nav — tab aktif: pil biru + label tebal + aria-current="page" (B1 hal 2). */
 export function BottomNav({ items }: { items: ItemNav[] }) {
@@ -30,12 +34,12 @@ export function BottomNav({ items }: { items: ItemNav[] }) {
   )
 }
 
-/** Top app bar mobile: "HRIS PT. SMP" + lonceng. */
-export function TopBarMobile({ ke, ekstra }: { ke: string; ekstra?: ReactNode }) {
+/** Top app bar mobile: judul halaman ("HRIS PT. SMP" di Beranda) + lonceng. */
+export function TopBarMobile({ ke, judul = 'HRIS PT. SMP', ekstra }: { ke: string; judul?: string; ekstra?: ReactNode }) {
   return (
     <header className="sticky top-0 z-10 border-b border-garis bg-permukaan">
       <div className="mx-auto flex h-14 max-w-[480px] items-center justify-between pr-2 pl-4">
-        <span className="text-[17px] leading-6 font-bold">HRIS PT. SMP</span>
+        <span className="text-[17px] leading-6 font-bold">{judul}</span>
         <div className="flex items-center gap-1">
           {ekstra}
           <TombolNotifikasi ke={ke} />

@@ -5,7 +5,7 @@ import { Laptop, LogOut, Search, User } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useProfil } from '../auth/sesi'
 import { AKSES, LABEL_PERAN, NAV_PANEL, NAV_PANEL_BAWAH, NAV_PANEL_MOBILE_DIREKSI, type ItemNav } from '../navigasi'
-import { BottomNav, TombolNotifikasi, TopBarMobile } from './bagian'
+import { BottomNav, judulMobile, TombolNotifikasi, TopBarMobile } from './bagian'
 
 const kelasMenu = ({ isActive }: { isActive: boolean }) =>
   `fokus-ring flex h-11 items-center gap-3 rounded-kontrol px-3 text-[15px] ${isActive ? 'bg-primer-50 font-semibold text-primer' : 'text-teks hover:bg-latar'}`
@@ -77,7 +77,7 @@ export default function LayoutPanel() {
           </div>
         </header>
         <div className="lg:hidden">
-          <TopBarMobile ke="/panel/notifikasi" />
+          <TopBarMobile ke="/panel/notifikasi" judul={judulMobile(pathname)} />
         </div>
 
         {hr ? (

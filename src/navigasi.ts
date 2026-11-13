@@ -68,6 +68,9 @@ export const AKSES: Record<string, { label: string; peran: Peran[] }> = (() => {
     tambah(p.keamanan, r)
     tambah({ ke: '/panel/notifikasi', label: 'Notifikasi' }, r)
   }
-  for (const r of ['karyawan', 'atasan', 'hr'] as const) tambah({ ke: '/notifikasi', label: 'Notifikasi' }, r)
+  for (const r of ['karyawan', 'atasan', 'hr'] as const) {
+    tambah({ ke: '/notifikasi', label: 'Notifikasi' }, r)
+    tambah({ ke: '/ganti-password', label: 'Ganti password' }, r)
+  }
   return akses
 })()

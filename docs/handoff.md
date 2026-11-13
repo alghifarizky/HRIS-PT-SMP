@@ -17,7 +17,9 @@ Ringkasan diskusi perencanaan (claude.ai, 12 Nov 2026) untuk dilanjutkan di Clau
 | Supabase CLI, migrasi, tabel `pengguna` + RLS | ✅ Fase 1 (13 Nov 2026) — 30 uji pgTAP, di-push ke production |
 | Auth & UI dasar | ✅ Login, lupa/atur password (token_hash), SMTP Gmail `hris.ptsmp@gmail.com`, layout & routing per peran (Mobile / Panel) |
 | Akun uji | HR & Direksi (`alghifarirzk+hr/+direksi@gmail.com`). Karyawan & Atasan dibuat lewat fitur tambah karyawan di Fase 2 |
-| Berikutnya | **Fase 2** — master data & data karyawan (EMP-, MST-) |
+| Fase 2 — master data & karyawan | ✅ (13 Nov 2026) — master data (jadwal, hari libur, pengaturan), log audit + alasan perubahan, Edge Function `akun` (undang / kirim ulang / ubah email), daftar–tambah–edit–detail karyawan, KTP hanya lewat `lihat_ktp`, nonaktif terjadwal (pg_cron 00:05 WIB) & aktif kembali, profil & ganti password. 121 uji pgTAP, 70 uji Vitest, uji integrasi `scripts/uji-akun-lokal.mjs` |
+| Akun uji tambahan | Karyawan & Atasan uji (`alghifarirzk+karyawan/+atasan@gmail.com`) dibuat lewat fitur tambah karyawan |
+| Berikutnya | **Fase 3** — absensi + selfie + trigger terlambat + auto clock out (ATT-) |
 
 ---
 
@@ -37,6 +39,8 @@ Ikuti fase di `docs/prd.md` §9. Kerjakan satu langkah per giliran.
 
 **Catatan untuk fase berikutnya (13 Nov 2026)**
 - Fase 2: karyawan login dengan **email pribadi** (tidak ada email kantor). Di form tambah/edit karyawan, label desain "Email kantor" diganti "Email", contoh `nama@gmail.com`.
+- Fase 3: selfie butuh HTTPS (getUserMedia) — uji di HP perlu deploy preview (Vercel) atau tunnel HTTPS; `localhost` hanya di laptop.
+- Fase 4: trigger `kelola_nonaktif` ditambah pembatalan pengajuan Menunggu; job reset saldo 1 Jan memberi jatah proporsional bagi yang masuk tahun itu; tampilkan "N hari terpakai" & "cuti menunggu" di profil/detail.
 - Fase 7: pecah chunk utama bundle (±580 kB / 170 kB gzip: Supabase, React, Router) — peringatan Vite > 500 kB sengaja ditunda.
 
 **Prioritas unit test (Vitest)**: hitung hari kerja, upah lembur (hari kerja / libur / libur di Sabtu), hari hadir, rumus slip, saldo cuti proporsional. Gunakan data uji di §5.
