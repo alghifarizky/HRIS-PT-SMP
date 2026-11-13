@@ -96,11 +96,14 @@ export function DialogNonaktifkan({ k, onTutup }: { k: DetailKaryawan; onTutup: 
 }
 
 export function DialogBatalNonaktif({ k, onTutup }: { k: DetailKaryawan; onTutup: () => void }) {
+  // Simpan tanggal saat dialog dibuka: setelah batal tersimpan, data dimuat ulang (tanggal jadi null)
+  // sebelum dialog tertutup — merender ulang dari k.tanggal_nonaktif membuat format tanggal gagal.
+  const [tanggal] = useState(k.tanggal_nonaktif)
   const m = useSimpan(k, `Penonaktifan ${k.nama} dibatalkan.`, onTutup)
   return (
     <Dialog judul="Batalkan penonaktifan?" onTutup={onTutup}>
       <p className="text-[15px] leading-[22px] text-teks-sekunder">
-        {k.nama} dijadwalkan nonaktif setelah {tanggalPendek(dariTanggalDb(k.tanggal_nonaktif!))}. Jika dibatalkan, akun tetap aktif seperti biasa.
+        {k.nama} dijadwalkan nonaktif {tanggal ? `setelah ${tanggalPendek(dariTanggalDb(tanggal))}` : ''}. Jika dibatalkan, akun tetap aktif seperti biasa.
       </p>
       {m.isError && <div className="mt-4"><BannerGalat>{m.error.message}</BannerGalat></div>}
       <Aksi onTutup={onTutup}>

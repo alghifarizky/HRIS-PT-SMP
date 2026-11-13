@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ComponentType, type ReactNode } from 'react'
-import { createBrowserRouter, Navigate, Outlet, RouterProvider, type RouteObject } from 'react-router'
+import { createBrowserRouter, Navigate, Outlet, RouterProvider, useRouteError, type RouteObject } from 'react-router'
 import { supabase } from './lib/supabase'
 import { useProfil, useSesi, type Peran } from './auth/sesi'
 import { AKSES, halamanAwal } from './navigasi'
@@ -76,6 +76,9 @@ const ruteDari = (pilih: (ke: string) => boolean): RouteObject[] =>
 
 const router = createBrowserRouter([
   {
+    errorElement: <LayarGalat />,
+    children: [
+  {
     element: <HanyaTamu />,
     children: [
       { path: '/masuk', lazy: lazyHalaman(() => import('./halaman/Masuk')) },
@@ -94,10 +97,25 @@ const router = createBrowserRouter([
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },
+    ],
+  },
 ])
 
 export default function App() {
   return <RouterProvider router={router} />
+}
+
+/** Pengganti layar galat teknis bawaan router bila ada error tak terduga saat render. */
+function LayarGalat() {
+  console.error(useRouteError())
+  return (
+    <LayarPesan
+      judul="Terjadi kesalahan"
+      pesan="Halaman ini mengalami gangguan. Muat ulang untuk mencoba lagi; bila berulang, hubungi admin aplikasi."
+      aksi="Muat ulang"
+      onAksi={() => window.location.reload()}
+    />
+  )
 }
 
 function LayarMemuat() {
