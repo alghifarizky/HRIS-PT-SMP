@@ -19,6 +19,7 @@ Ringkasan diskusi perencanaan (claude.ai, 12 Nov 2026) untuk dilanjutkan di Clau
 | Akun uji | HR & Direksi (`alghifarirzk+hr/+direksi@gmail.com`). Karyawan & Atasan dibuat lewat fitur tambah karyawan di Fase 2 |
 | Fase 2 — master data & karyawan | ✅ (13 Nov 2026) — master data (jadwal, hari libur, pengaturan), log audit + alasan perubahan, Edge Function `akun` (undang / kirim ulang / ubah email), daftar–tambah–edit–detail karyawan, KTP hanya lewat `lihat_ktp`, nonaktif terjadwal (pg_cron 00:05 WIB) & aktif kembali, profil & ganti password. 121 uji pgTAP, 70 uji Vitest, uji integrasi `scripts/uji-akun-lokal.mjs` |
 | Akun uji tambahan | Karyawan & Atasan uji (`alghifarirzk+karyawan/+atasan@gmail.com`) dibuat lewat fitur tambah karyawan |
+| Deploy preview | ✅ Vercel `https://hris-pt-smp.vercel.app` (auto-deploy dari `main`); domain terdaftar di redirect URL Supabase & secret `APP_ORIGINS`. `site_url` masih `localhost:5173` sampai go-live |
 | Berikutnya | **Fase 3** — absensi + selfie + trigger terlambat + auto clock out (ATT-) |
 
 ---
