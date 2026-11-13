@@ -63,6 +63,7 @@ export const AKSES: Record<string, { label: string; peran: Peran[] }> = (() => {
   tambah(m.slip, 'atasan') // Atasan membuka slip dari Profil
   tambah({ ke: '/panel/karyawan/tambah', label: 'Karyawan' }, 'hr') // Direksi tanpa tombol tambah (PRD EMP-08)
   tambah({ ke: '/panel/karyawan/:id/edit', label: 'Karyawan' }, 'hr')
+  for (const r of ['hr', 'direksi'] as const) tambah({ ke: '/panel/karyawan/:id', label: 'Karyawan' }, r)
   for (const r of ['hr', 'direksi'] as const) {
     tambah(p.keamanan, r)
     tambah({ ke: '/panel/notifikasi', label: 'Notifikasi' }, r)

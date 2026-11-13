@@ -15,29 +15,13 @@ import { skemaEmail } from '../../lib/validasi'
 import { jatahProporsional } from '../../lib/cuti'
 import { dariTanggalDb, hariIniDb, tahunIni, tanggalPendek } from '../../lib/format'
 import { LABEL_PERAN } from '../../navigasi'
-import { useProfil, type Peran } from '../../auth/sesi'
+import { useProfil } from '../../auth/sesi'
 import { Field, Input, Tombol } from '../../komponen/form'
 import { InputKtp, InputRupiah } from '../../komponen/inputKhusus'
 import { useToast } from '../../komponen/toast'
-import { useDaftarKaryawan } from './data'
+import { useDaftarKaryawan, type DetailKaryawan } from './data'
 
-export type DataKaryawan = {
-  id: string
-  email: string
-  nama: string
-  role: Peran
-  atasan_id: string | null
-  nik: string | null
-  jabatan: string | null
-  tanggal_lahir: string | null
-  alamat: string | null
-  tanggal_masuk: string | null
-  no_ktp_tersamar: string | null
-  status_menikah: 'belum_menikah' | 'menikah' | null
-  jumlah_tanggungan: number
-  gaji_pokok: number | null
-  saldo_cuti: number | null
-}
+export type DataKaryawan = DetailKaryawan
 
 const kelasSelect = 'fokus-ring h-12 w-full rounded-kontrol border bg-permukaan px-3 text-[15px] lg:h-11'
 
@@ -138,6 +122,10 @@ export default function FormKaryawan({ awal }: { awal?: DataKaryawan }) {
     if (usulan.data && !getFieldState('nik').isDirty) setValue('nik', usulan.data)
   }, [usulan.data, getFieldState, setValue])
 
+  // Atasan yang masih membawahi tidak boleh diganti perannya (trigger validasi_atasan) — beri tahu sebelum simpan
+  const jumlahBawahan = (daftar.data ?? []).filter((k) => k.atasan_id === awal?.id && k.aktif && k.role === 'karyawan').length
+  const terhalangBawahan = edit && awal.role === 'atasan' && role !== 'atasan' && jumlahBawahan > 0
+
   const pilihanAtasan = (daftar.data ?? []).filter(
     (k) => k.aktif && k.id !== awal?.id && k.role === (role === 'karyawan' ? 'atasan' : 'direksi'),
   )
@@ -197,7 +185,7 @@ export default function FormKaryawan({ awal }: { awal?: DataKaryawan }) {
     }
     await qc.invalidateQueries({ queryKey: ['karyawan'] })
     toast(`Perubahan data ${v.nama} disimpan.`)
-    navigate('/panel/karyawan')
+    navigate(`/panel/karyawan/${awal.id}`)
   })
 
   function tanganiPesan(pesan: string) {
@@ -215,7 +203,14 @@ export default function FormKaryawan({ awal }: { awal?: DataKaryawan }) {
     <div>
       <nav aria-label="Breadcrumb" className="text-sm text-teks-sekunder">
         <Link to="/panel/karyawan" className="fokus-ring rounded text-primer hover:underline">Karyawan</Link>
-        {edit ? ` › ${awal.nama} › Edit` : ' › Tambah karyawan'}
+        {edit ? (
+          <>
+            {' › '}
+            <Link to={`/panel/karyawan/${awal.id}`} className="fokus-ring rounded text-primer hover:underline">{awal.nama}</Link> › Edit
+          </>
+        ) : (
+          ' › Tambah karyawan'
+        )}
       </nav>
       <h1 className="mt-2 text-[28px] leading-[34px] font-semibold">{judul}</h1>
       <p className="mt-1 text-[15px] text-teks-sekunder">
@@ -269,6 +264,12 @@ export default function FormKaryawan({ awal }: { awal?: DataKaryawan }) {
                 </select>
               )}
             </Field>
+            {terhalangBawahan && (
+              <p role="alert" className="col-span-3 flex gap-3 rounded-kontrol bg-peringatan-latar p-3 text-[15px] text-peringatan">
+                <CircleAlert className="mt-0.5 size-5 shrink-0 text-peringatan-ikon" aria-hidden />
+                {awal.nama} masih membawahi {jumlahBawahan} karyawan. Pindahkan dulu ke atasan lain sebelum mengubah perannya.
+              </p>
+            )}
             {!direksi && (
               <Field id="atasan_id" label="Atasan langsung" wajib={role === 'karyawan'} galat={errors.atasan_id?.message}>
                 <select id="atasan_id" aria-invalid={!!errors.atasan_id || undefined} className={`${kelasSelect} ${errors.atasan_id ? 'border-bahaya-ikon' : 'border-garis'}`} {...register('atasan_id')}>
@@ -334,8 +335,8 @@ export default function FormKaryawan({ awal }: { awal?: DataKaryawan }) {
           </Bagian>
 
           <div className="flex justify-end gap-3">
-            <Tombol varian="sekunder" onClick={() => navigate('/panel/karyawan')}>Batal</Tombol>
-            <Tombol type="submit" memproses={isSubmitting}>{edit ? 'Simpan perubahan' : 'Simpan & kirim undangan'}</Tombol>
+            <Tombol varian="sekunder" onClick={() => navigate(edit ? `/panel/karyawan/${awal.id}` : '/panel/karyawan')}>Batal</Tombol>
+            <Tombol type="submit" memproses={isSubmitting} disabled={terhalangBawahan}>{edit ? 'Simpan perubahan' : 'Simpan & kirim undangan'}</Tombol>
           </div>
         </div>
 

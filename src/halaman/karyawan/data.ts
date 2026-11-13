@@ -33,3 +33,40 @@ export function useDaftarKaryawan() {
     },
   })
 }
+
+export type DetailKaryawan = {
+  id: string
+  email: string
+  nama: string
+  role: Peran
+  aktif: boolean
+  atasan_id: string | null
+  atasan: { nama: string } | null
+  nik: string | null
+  jabatan: string | null
+  tanggal_lahir: string | null
+  alamat: string | null
+  tanggal_masuk: string | null
+  no_ktp_tersamar: string | null
+  status_menikah: 'belum_menikah' | 'menikah' | null
+  jumlah_tanggungan: number
+  gaji_pokok: number | null
+  saldo_cuti: number | null
+}
+
+/** Satu karyawan (detail & edit). No. KTP hanya versi tersamar — nomor lengkap lewat RPC lihat_ktp. */
+export function useKaryawan(id: string | undefined) {
+  return useQuery({
+    queryKey: ['karyawan', id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('pengguna')
+        .select('id, email, nama, role, aktif, atasan_id, atasan:pengguna!atasan_id(nama), nik, jabatan, tanggal_lahir, alamat, tanggal_masuk, no_ktp_tersamar, status_menikah, jumlah_tanggungan, gaji_pokok, saldo_cuti')
+        .eq('id', id!)
+        .maybeSingle()
+      if (error) throw error
+      return data as unknown as DetailKaryawan | null
+    },
+  })
+}

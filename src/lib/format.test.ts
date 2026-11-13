@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { dariTanggalDb, namaHari, rupiah, sapaan, tanggalPanjang, tanggalPendek } from './format'
+import { dariTanggalDb, namaHari, rupiah, sapaan, tanggalPanjang, tanggalPendek, waktuSingkat } from './format'
 
 // Jam ditulis dalam WIB (+07:00) agar tes tidak bergantung zona waktu mesin
 const wib = (iso: string) => new Date(`${iso}+07:00`)
@@ -35,4 +35,8 @@ describe('tanggal dari database', () => {
 describe('rupiah', () => {
   it('format desain', () => expect(rupiah(4500000)).toBe('Rp 4.500.000'))
   it('nol', () => expect(rupiah(0)).toBe('Rp 0'))
+})
+
+describe('waktuSingkat', () => {
+  it('format desain, WIB', () => expect(waktuSingkat(new Date('2026-11-12T23:51:00Z'))).toBe('Jum, 13 Nov 2026 · 06:51'))
 })

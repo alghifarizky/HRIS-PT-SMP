@@ -37,3 +37,8 @@ export const rupiah = (n: number) => `Rp ${fmtRupiah.format(n)}`
 
 /** Tanggal hari ini (WIB) sebagai "YYYY-MM-DD". */
 export const hariIniDb = () => new Intl.DateTimeFormat('en-CA', { timeZone: ZONA }).format(new Date())
+
+const fmtTglSingkat = new Intl.DateTimeFormat('id-ID', { timeZone: ZONA, weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+const fmtJamMenit = new Intl.DateTimeFormat('id-ID', { timeZone: ZONA, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+/** "Kam, 12 Nov 2026 · 06:51" (WIB) */
+export const waktuSingkat = (d: Date) => `${fmtTglSingkat.format(d)} · ${fmtJamMenit.format(d).replace('.', ':')}`
