@@ -1,7 +1,15 @@
-// Beranda (mobile) & Dashboard (panel) — sementara hanya sapaan; kartu-kartu diisi di fase fiturnya.
+// Beranda (mobile) & Dashboard (panel). Kartu lain (slip, saldo, pengajuan) diisi di fase fiturnya.
+import { useLocation } from 'react-router'
 import { useProfil } from '../auth/sesi'
 import Sapaan from '../komponen/Sapaan'
+import KartuAbsensiHariIni from './absensi/KartuAbsensiHariIni'
 
 export default function Beranda() {
-  return <Sapaan nama={useProfil().data!.nama} />
+  const { pathname } = useLocation()
+  return (
+    <div className="flex flex-col gap-4">
+      <Sapaan nama={useProfil().data!.nama} />
+      {pathname === '/beranda' && <KartuAbsensiHariIni />}
+    </div>
+  )
 }

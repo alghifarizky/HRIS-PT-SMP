@@ -71,6 +71,7 @@ export const AKSES: Record<string, { label: string; peran: Peran[] }> = (() => {
   for (const r of ['karyawan', 'atasan', 'hr'] as const) {
     tambah({ ke: '/notifikasi', label: 'Notifikasi' }, r)
     tambah({ ke: '/ganti-password', label: 'Ganti password' }, r)
+    tambah({ ke: '/clock', label: 'Clock' }, r) // layar penuh kamera, di luar shell mobile
   }
   return akses
 })()

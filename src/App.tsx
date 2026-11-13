@@ -20,6 +20,7 @@ const HALAMAN: Record<string, ComponentType> = {
   '/profil': lazy(() => import('./halaman/profil/ProfilSaya')),
   '/panel/profil': lazy(() => import('./halaman/profil/ProfilSaya')),
   '/ganti-password': lazy(() => import('./halaman/profil/GantiPassword')),
+  '/clock': lazy(() => import('./halaman/absensi/ClockKamera')),
 }
 
 // Route guard hanya untuk UX — keamanan sebenarnya di RLS.
@@ -88,7 +89,8 @@ const router = createBrowserRouter([
     element: <WajibMasuk />,
     children: [
       { index: true, element: <KeHalamanAwal /> },
-      { lazy: lazyHalaman(() => import('./layout/LayoutMobile')), children: ruteDari((ke) => !ke.startsWith('/panel')) },
+      ...ruteDari((ke) => ke === '/clock'), // layar penuh tanpa shell
+      { lazy: lazyHalaman(() => import('./layout/LayoutMobile')), children: ruteDari((ke) => !ke.startsWith('/panel') && ke !== '/clock') },
       { lazy: lazyHalaman(() => import('./layout/LayoutPanel')), children: ruteDari((ke) => ke.startsWith('/panel')) },
     ],
   },
