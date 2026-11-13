@@ -281,6 +281,7 @@ Nilai gaji pokok & tarif disalin ke slip saat payroll dibuat.
 | No. KTP | Dilindungi RLS + view terbatas (tanpa enkripsi tambahan); tampil tersamar, HR & Direksi bisa "Tampilkan" (tercatat di log audit) |
 | Karyawan nonaktif | Pengajuan Menunggu dibatalkan otomatis pada tanggal efektif |
 | Email aplikasi | Dikirim dari Gmail khusus aplikasi (`hris.ptsmp@gmail.com`) lewat SMTP; karyawan login dengan email pribadi masing-masing (satu email per orang). Notifikasi harian di dalam aplikasi, bukan email |
+| Jadwal kerja | Perubahan jadwal oleh HR langsung berlaku (bukan mulai hari berikutnya seperti teks desain) dan tercatat di log audit |
 | Pergantian HR | Direksi (owner, satu orang) yang mengangkat, mengganti & menonaktifkan HR (EMP-08). HR tetap boleh mengubah gaji & saldo cuti miliknya sendiri — diawasi lewat persetujuan payroll Direksi & log audit |
 
 Belum ada pertanyaan terbuka.

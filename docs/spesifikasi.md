@@ -629,7 +629,7 @@ erDiagram
   log_audit {
     uuid id PK
     text tabel
-    uuid baris_id
+    text baris_id "kunci baris (uuid / tanggal / hari)"
     enum aksi "insert, update, delete, lihat_ktp"
     jsonb nilai_lama
     jsonb nilai_baru
