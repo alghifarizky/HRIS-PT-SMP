@@ -1,4 +1,5 @@
-// Komponen form dasar — design system v1 (B1 hal 2): kontrol 48 px, radius 8, label di atas field.
+// Komponen form dasar — design system v1 (B1 hal 2): kontrol 48 px (mobile) / 44 px (desktop, handoff §4),
+// radius 8, label di atas field.
 import { useState, type ComponentProps, type ReactNode } from 'react'
 import { CircleAlert, Eye, EyeOff } from 'lucide-react'
 
@@ -26,7 +27,7 @@ export function Input({ galat, className = '', ...p }: InputProps) {
     <input
       aria-invalid={galat || undefined}
       aria-describedby={galat && p.id ? `${p.id}-galat` : undefined}
-      className={`fokus-ring h-12 w-full rounded-kontrol border bg-permukaan px-4 text-[15px] placeholder:text-teks-3 ${galat ? 'border-bahaya-ikon' : 'border-garis'} ${className}`}
+      className={`fokus-ring h-12 w-full rounded-kontrol border bg-permukaan px-4 text-[15px] lg:h-11 placeholder:text-teks-3 ${galat ? 'border-bahaya-ikon' : 'border-garis'} ${className}`}
       {...p}
     />
   )
@@ -42,7 +43,7 @@ export function InputPassword(p: Omit<InputProps, 'type'>) {
         onClick={() => setLihat((v) => !v)}
         aria-label={lihat ? 'Sembunyikan password' : 'Tampilkan password'}
         aria-pressed={lihat}
-        className="fokus-ring absolute top-0 right-0 flex size-12 items-center justify-center rounded-kontrol text-teks-sekunder"
+        className="fokus-ring absolute top-0 right-0 flex size-12 items-center lg:size-11 justify-center rounded-kontrol text-teks-sekunder"
       >
         {lihat ? <EyeOff className="size-5" aria-hidden /> : <Eye className="size-5" aria-hidden />}
       </button>
@@ -59,14 +60,28 @@ export function BannerGalat({ children }: { children: ReactNode }) {
   )
 }
 
-export function TombolPrimer({ memproses, children, className = '', ...p }: ComponentProps<'button'> & { memproses?: boolean }) {
+const VARIAN = {
+  primer: 'bg-primer text-white hover:bg-primer-700',
+  sekunder: 'border border-garis bg-permukaan text-teks hover:bg-latar',
+  bahaya: 'bg-bahaya-ikon text-white hover:bg-bahaya',
+}
+
+export function Tombol({
+  memproses,
+  varian = 'primer',
+  disabled,
+  children,
+  className = '',
+  ...p
+}: ComponentProps<'button'> & { memproses?: boolean; varian?: keyof typeof VARIAN }) {
   return (
     <button
-      disabled={memproses || p.disabled}
-      className={`fokus-ring flex h-12 w-full items-center justify-center gap-2 rounded-kontrol bg-primer text-base font-semibold text-white hover:bg-primer-700 disabled:opacity-80 ${className}`}
+      type="button"
       {...p}
+      disabled={memproses || disabled}
+      className={`fokus-ring flex h-12 items-center justify-center gap-2 rounded-kontrol px-5 text-base font-semibold disabled:opacity-60 lg:h-11 ${VARIAN[varian]} ${className}`}
     >
-      {memproses && <span className="size-5 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden />}
+      {memproses && <span className="size-5 animate-spin rounded-full border-2 border-current/40 border-t-current" aria-hidden />}
       {memproses ? 'Memproses' : children}
     </button>
   )

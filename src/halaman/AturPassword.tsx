@@ -13,7 +13,7 @@ import { supabase } from '../lib/supabase'
 import { skemaPasswordBaru } from '../lib/validasi'
 import { useSesi } from '../auth/sesi'
 import HalamanAuth from '../komponen/HalamanAuth'
-import { BannerGalat, Field, InputPassword, TombolPrimer } from '../komponen/form'
+import { BannerGalat, Field, InputPassword, Tombol } from '../komponen/form'
 
 const skema = z
   .object({ password: skemaPasswordBaru, ulangi: z.string().min(1, 'Ulangi password baru.') })
@@ -83,9 +83,9 @@ export default function AturPassword() {
         <Field id="ulangi" label="Ulangi password baru" galat={errors.ulangi?.message}>
           <InputPassword id="ulangi" autoComplete="new-password" placeholder="Ketik ulang password" galat={!!errors.ulangi} {...register('ulangi')} />
         </Field>
-        <TombolPrimer type="submit" memproses={isSubmitting} className="mt-4">
+        <Tombol type="submit" memproses={isSubmitting} className="mt-4">
           Simpan password
-        </TombolPrimer>
+        </Tombol>
       </form>
     </HalamanAuth>
   )

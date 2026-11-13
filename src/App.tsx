@@ -1,10 +1,18 @@
-import type { ComponentType, ReactNode } from 'react'
+import { lazy, Suspense, type ComponentType, type ReactNode } from 'react'
 import { createBrowserRouter, Navigate, Outlet, RouterProvider, type RouteObject } from 'react-router'
 import { supabase } from './lib/supabase'
 import { useProfil, useSesi, type Peran } from './auth/sesi'
 import { AKSES, halamanAwal } from './navigasi'
 import Segera from './halaman/Segera'
 import Beranda from './halaman/Beranda'
+import { Skeleton } from './komponen/keadaan'
+
+/** Halaman yang sudah dikerjakan; selainnya "Segera hadir". */
+const HALAMAN: Record<string, ComponentType> = {
+  '/beranda': Beranda,
+  '/panel': Beranda,
+  '/panel/master-data': lazy(() => import('./halaman/master-data/MasterData')),
+}
 
 // Route guard hanya untuk UX — keamanan sebenarnya di RLS.
 function HanyaTamu() {
@@ -43,7 +51,13 @@ function TombolKeluar() {
   )
 }
 
-/** Satu rute per halaman di AKSES; isi sementara "Segera hadir", kecuali beranda/dashboard. */
+function halaman(ke: string, label: string) {
+  const Halaman = HALAMAN[ke]
+  if (Halaman) return <Halaman />
+  return <Segera judul={label}>{ke.endsWith('/profil') && <TombolKeluar />}</Segera>
+}
+
+/** Satu rute per halaman di AKSES. */
 const ruteDari = (pilih: (ke: string) => boolean): RouteObject[] =>
   Object.entries(AKSES)
     .filter(([ke]) => pilih(ke))
@@ -51,7 +65,7 @@ const ruteDari = (pilih: (ke: string) => boolean): RouteObject[] =>
       path: ke,
       element: (
         <HanyaPeran peran={peran}>
-          {ke === '/beranda' || ke === '/panel' ? <Beranda /> : <Segera judul={label}>{ke.endsWith('/profil') && <TombolKeluar />}</Segera>}
+          <Suspense fallback={<Skeleton />}>{halaman(ke, label)}</Suspense>
         </HanyaPeran>
       ),
     }))

@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { Link } from 'react-router'
 import { supabase } from '../lib/supabase'
 import HalamanAuth from '../komponen/HalamanAuth'
-import { BannerGalat, Field, Input, InputPassword, TombolPrimer } from '../komponen/form'
+import { BannerGalat, Field, Input, InputPassword, Tombol } from '../komponen/form'
 import { skemaEmail } from '../lib/validasi'
 
 const skema = z.object({ email: skemaEmail, password: z.string().min(1, 'Password wajib diisi.') })
@@ -56,9 +56,9 @@ export default function Masuk() {
         <Link to="/lupa-password" className="fokus-ring flex min-h-11 items-center self-end rounded-kontrol text-[15px] font-semibold text-primer">
           Lupa password?
         </Link>
-        <TombolPrimer type="submit" memproses={isSubmitting} className="mt-2">
+        <Tombol type="submit" memproses={isSubmitting} className="mt-2">
           Masuk
-        </TombolPrimer>
+        </Tombol>
       </form>
 
       <footer className="mt-auto pt-12 text-center">

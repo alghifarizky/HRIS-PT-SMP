@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { sapaan, tanggalPanjang } from './format'
+import { dariTanggalDb, namaHari, sapaan, tanggalPanjang, tanggalPendek } from './format'
 
 // Jam ditulis dalam WIB (+07:00) agar tes tidak bergantung zona waktu mesin
 const wib = (iso: string) => new Date(`${iso}+07:00`)
@@ -21,4 +21,13 @@ describe('sapaan', () => {
     ['18:00', 'Selamat malam'],
     ['00:00', 'Selamat malam'],
   ])('%s → %s', (jam, harap) => expect(sapaan(wib(`2026-11-12T${jam}`))).toBe(harap))
+})
+
+describe('tanggal dari database', () => {
+  it('tanggalPendek & namaHari', () => {
+    const d = dariTanggalDb('2026-12-25')
+    expect(tanggalPendek(d)).toBe('25 Des 2026')
+    expect(namaHari(d)).toBe('Jumat')
+  })
+  it('tidak bergeser hari di zona mana pun', () => expect(namaHari(dariTanggalDb('2026-01-01'))).toBe('Kamis'))
 })

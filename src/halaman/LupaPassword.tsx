@@ -8,7 +8,7 @@ import { Mail } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { skemaEmail } from '../lib/validasi'
 import HalamanAuth from '../komponen/HalamanAuth'
-import { BannerGalat, Field, Input, TombolPrimer } from '../komponen/form'
+import { BannerGalat, Field, Input, Tombol } from '../komponen/form'
 
 const skema = z.object({ email: skemaEmail })
 type Isian = z.infer<typeof skema>
@@ -55,9 +55,9 @@ export default function LupaPassword() {
         <Field id="email" label="Email" galat={errors.email?.message}>
           <Input id="email" type="email" autoComplete="username" inputMode="email" placeholder="nama@gmail.com" galat={!!errors.email} {...register('email')} />
         </Field>
-        <TombolPrimer type="submit" memproses={isSubmitting}>
+        <Tombol type="submit" memproses={isSubmitting}>
           Kirim link reset
-        </TombolPrimer>
+        </Tombol>
       </form>
       <p className="mt-6 text-[15px] leading-[22px] text-teks-sekunder">Tidak bisa membuka email tersebut? Hubungi HR untuk reset manual.</p>
     </HalamanAuth>

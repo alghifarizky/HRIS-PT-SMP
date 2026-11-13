@@ -15,3 +15,18 @@ export function sapaan(d: Date) {
   if (jam >= 15 && jam < 18) return 'Selamat sore'
   return 'Selamat malam'
 }
+
+const fmtTanggalPendek = new Intl.DateTimeFormat('id-ID', { timeZone: ZONA, day: 'numeric', month: 'short', year: 'numeric' })
+const fmtHari = new Intl.DateTimeFormat('id-ID', { timeZone: ZONA, weekday: 'long' })
+
+/** Kolom `date` Postgres ("2026-12-25") → Date pada tengah malam WIB. */
+export const dariTanggalDb = (s: string) => new Date(`${s}T00:00:00+07:00`)
+
+/** "25 Des 2026" */
+export const tanggalPendek = (d: Date) => fmtTanggalPendek.format(d)
+
+/** "Jumat" */
+export const namaHari = (d: Date) => fmtHari.format(d)
+
+/** Tahun berjalan menurut WIB. */
+export const tahunIni = () => Number(new Intl.DateTimeFormat('en-CA', { timeZone: ZONA, year: 'numeric' }).format(new Date()))
