@@ -1,6 +1,6 @@
 // Shell panel HR & Direksi — desain B3A hal 3, B4 hal 1 (≥ 1024 px) & B4 hal 46 (Direksi < 1024 px).
 // HR di layar kecil diarahkan ke "Akun saya" (keputusan Al, 13 Nov 2026 — panel HR tidak punya desain mobile).
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
+import { Link, matchPath, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { Laptop, LogOut, Search, User } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useProfil } from '../auth/sesi'
@@ -23,7 +23,7 @@ function ItemMenu({ item }: { item: ItemNav }) {
 export default function LayoutPanel() {
   const profil = useProfil().data!
   const { pathname } = useLocation()
-  const judul = AKSES[pathname]?.label ?? ''
+  const judul = Object.entries(AKSES).find(([ke]) => matchPath(ke, pathname))?.[1].label ?? ''
   const hr = profil.role === 'hr'
   const inisial = profil.nama.split(' ').slice(0, 2).map((k) => k[0]).join('').toUpperCase()
 

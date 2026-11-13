@@ -123,7 +123,16 @@ export default function DaftarKaryawan() {
                   {hal.isi.map((k) => (
                     <tr key={k.id} className={k.aktif ? '' : 'text-teks-3'}>
                       <td className="px-5 py-3 whitespace-nowrap tabular-nums">{k.nik ?? '—'}</td>
-                      <th scope="row" className={`px-5 py-3 font-semibold ${k.aktif ? '' : 'font-medium'}`}>{k.nama}</th>
+                      <th scope="row" className={`px-5 py-3 font-semibold ${k.aktif ? '' : 'font-medium'}`}>
+                        {/* shortcut: sementara langsung ke Edit (HR); jadi ke halaman detail di langkah 2.4d */}
+                        {peranSaya === 'hr' ? (
+                          <Link to={`/panel/karyawan/${k.id}/edit`} className="fokus-ring rounded hover:text-primer hover:underline">
+                            {k.nama}
+                          </Link>
+                        ) : (
+                          k.nama
+                        )}
+                      </th>
                       <td className="px-5 py-3">{k.jabatan ?? '—'}</td>
                       <td className="px-5 py-3">{LABEL_PERAN[k.role]}</td>
                       <td className="px-5 py-3">{k.atasan?.nama ?? '—'}</td>

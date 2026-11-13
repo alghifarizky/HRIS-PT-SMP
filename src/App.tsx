@@ -14,6 +14,7 @@ const HALAMAN: Record<string, ComponentType> = {
   '/panel/master-data': lazy(() => import('./halaman/master-data/MasterData')),
   '/panel/karyawan': lazy(() => import('./halaman/karyawan/DaftarKaryawan')),
   '/panel/karyawan/tambah': lazy(() => import('./halaman/karyawan/TambahKaryawan')),
+  '/panel/karyawan/:id/edit': lazy(() => import('./halaman/karyawan/EditKaryawan')),
 }
 
 // Route guard hanya untuk UX — keamanan sebenarnya di RLS.

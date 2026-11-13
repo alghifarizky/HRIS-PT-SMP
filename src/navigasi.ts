@@ -62,6 +62,7 @@ export const AKSES: Record<string, { label: string; peran: Peran[] }> = (() => {
   NAV_PANEL_MOBILE_DIREKSI.forEach((i) => tambah(i, 'direksi'))
   tambah(m.slip, 'atasan') // Atasan membuka slip dari Profil
   tambah({ ke: '/panel/karyawan/tambah', label: 'Karyawan' }, 'hr') // Direksi tanpa tombol tambah (PRD EMP-08)
+  tambah({ ke: '/panel/karyawan/:id/edit', label: 'Karyawan' }, 'hr')
   for (const r of ['hr', 'direksi'] as const) {
     tambah(p.keamanan, r)
     tambah({ ke: '/panel/notifikasi', label: 'Notifikasi' }, r)
