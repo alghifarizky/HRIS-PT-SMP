@@ -35,3 +35,11 @@ describe('uraikanLog', () => {
       { label: 'Tanggal masuk', lama: '—', baru: '4 Mar 2019' },
     ]))
 })
+
+describe('uraikanLog penonaktifan', () => {
+  it('jadwal nonaktif terbaca', () =>
+    expect(uraikanLog({ aksi: 'update', nilai_lama: { tanggal_nonaktif: null, alasan_nonaktif: null }, nilai_baru: { tanggal_nonaktif: '2026-11-30', alasan_nonaktif: 'resign' } }, nama).perubahan).toEqual([
+      { label: 'Aktif sampai', lama: '—', baru: '30 Nov 2026' },
+      { label: 'Alasan nonaktif', lama: '—', baru: 'Resign' },
+    ]))
+})

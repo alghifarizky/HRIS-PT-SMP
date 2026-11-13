@@ -84,6 +84,7 @@ const VARIAN = {
   primer: 'bg-primer text-white hover:bg-primer-700',
   sekunder: 'border border-garis bg-permukaan text-teks hover:bg-latar',
   bahaya: 'bg-bahaya-ikon text-white hover:bg-bahaya',
+  bahayaGaris: 'border border-bahaya-latar bg-permukaan text-bahaya hover:bg-bahaya-latar',
 }
 
 export function Tombol({

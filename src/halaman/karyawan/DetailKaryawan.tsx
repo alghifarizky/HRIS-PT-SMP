@@ -14,6 +14,8 @@ import Dialog from '../../komponen/Dialog'
 import { useToast } from '../../komponen/toast'
 import { useDaftarKaryawan, useKaryawan, type DetailKaryawan as Detail } from './data'
 import { uraikanLog, type BarisLog } from './riwayat'
+import { LABEL_ALASAN_NONAKTIF } from './label'
+import { DialogAktifkanKembali, DialogBatalNonaktif, DialogNonaktifkan } from './DialogNonaktif'
 import { HEADER_ALASAN, kodeAlasan } from '../../lib/alasan'
 
 const TAB = [
@@ -26,20 +28,25 @@ const TAB = [
 
 const inisial = (nama: string) => nama.split(' ').slice(0, 2).map((k) => k[0]).join('').toUpperCase()
 const tgl = (s: string | null) => (s ? tanggalPendek(dariTanggalDb(s)) : '—')
+/** Hari pertama nonaktif = sehari setelah tanggal efektif (hari terakhir aktif). */
+const sehariSetelah = (s: string) => tanggalPendek(new Date(dariTanggalDb(s).getTime() + 86_400_000))
 
 export default function DetailKaryawan() {
   const { id } = useParams()
-  const peranSaya = useProfil().data!.role
+  const { role: peranSaya, id: idSaya } = useProfil().data!
   const q = useKaryawan(id)
   const [params, setParams] = useSearchParams()
   const tab = TAB.find((t) => t.id === params.get('tab')) ?? TAB[0]
   const [jadikanHr, setJadikanHr] = useState(false)
+  const [dialog, setDialog] = useState<'nonaktif' | 'batal' | 'aktifkan' | null>(null)
 
   if (q.isPending) return <Skeleton baris={10} />
   if (q.isError) return <KeadaanGalat judul="Data karyawan gagal dimuat" onCobaLagi={() => q.refetch()} />
   if (!q.data) return <KeadaanKosong judul="Karyawan tidak ditemukan" pesan="Data mungkin sudah dihapus atau tautan salah." />
   const k = q.data
   const bolehJadikanHr = peranSaya === 'direksi' && k.aktif && (k.role === 'karyawan' || k.role === 'atasan')
+  // HR: semua kecuali Direksi & diri sendiri; Direksi: hanya HR (EMP-08) — dijaga juga trigger kelola_nonaktif
+  const bolehKelolaStatus = k.id !== idSaya && ((peranSaya === 'hr' && k.role !== 'direksi') || (peranSaya === 'direksi' && k.role === 'hr'))
 
   return (
     <div>
@@ -56,11 +63,24 @@ export default function DetailKaryawan() {
             <div>
               <div className="flex items-center gap-3">
                 <h1 className="text-[24px] leading-8 font-semibold">{k.nama}</h1>
-                {k.aktif ? <Badge nada="sukses">Aktif</Badge> : <Badge nada="netral">Nonaktif</Badge>}
+                {!k.aktif ? (
+                  <Badge nada="netral">Nonaktif</Badge>
+                ) : k.tanggal_nonaktif ? (
+                  <Badge nada="peringatan">Aktif s.d. {tgl(k.tanggal_nonaktif)}</Badge>
+                ) : (
+                  <Badge nada="sukses">Aktif</Badge>
+                )}
               </div>
               <p className="mt-0.5 text-[15px] text-teks-sekunder">
                 {[k.jabatan, LABEL_PERAN[k.role], k.nik, k.atasan && `Atasan: ${k.atasan.nama}`].filter(Boolean).join(' · ')}
               </p>
+              {k.tanggal_nonaktif && k.alasan_nonaktif && (
+                <p className="mt-1 text-sm text-teks-sekunder">
+                  {k.aktif ? `Dijadwalkan nonaktif mulai ${sehariSetelah(k.tanggal_nonaktif)}` : `Nonaktif sejak ${sehariSetelah(k.tanggal_nonaktif)}`} ·{' '}
+                  {LABEL_ALASAN_NONAKTIF[k.alasan_nonaktif]}
+                  {k.catatan_nonaktif && ` · ${k.catatan_nonaktif}`}
+                </p>
+              )}
             </div>
           </div>
           <div className="flex gap-3">
@@ -74,6 +94,17 @@ export default function DetailKaryawan() {
                 Jadikan HR
               </Tombol>
             )}
+            {bolehKelolaStatus && k.aktif && !k.tanggal_nonaktif && (
+              <Tombol varian="bahayaGaris" onClick={() => setDialog('nonaktif')}>
+                Nonaktifkan
+              </Tombol>
+            )}
+            {bolehKelolaStatus && k.aktif && k.tanggal_nonaktif && (
+              <Tombol varian="sekunder" onClick={() => setDialog('batal')}>
+                Batalkan penonaktifan
+              </Tombol>
+            )}
+            {bolehKelolaStatus && !k.aktif && <Tombol onClick={() => setDialog('aktifkan')}>Aktifkan kembali</Tombol>}
           </div>
         </div>
 
@@ -104,6 +135,9 @@ export default function DetailKaryawan() {
       </div>
 
       {jadikanHr && <DialogJadikanHr k={k} onTutup={() => setJadikanHr(false)} />}
+      {dialog === 'nonaktif' && <DialogNonaktifkan k={k} onTutup={() => setDialog(null)} />}
+      {dialog === 'batal' && <DialogBatalNonaktif k={k} onTutup={() => setDialog(null)} />}
+      {dialog === 'aktifkan' && <DialogAktifkanKembali k={k} onTutup={() => setDialog(null)} />}
     </div>
   )
 }
@@ -216,7 +250,7 @@ function Profil({ k }: { k: Detail }) {
         <Kartu judul={direksi ? 'Akun' : 'Akun & cuti'}>
           <Baris label="Email"><span className="break-all">{k.email}</span></Baris>
           <Baris label="Status login">
-            {login.isPending ? '…' : login.isError || !login.data ? '—' : login.data.sudah_aktif ? 'Aktif' : <Badge nada="peringatan">Menunggu undangan</Badge>}
+            {!k.aktif ? 'Nonaktif' : login.isPending ? '…' : login.isError || !login.data ? '—' : login.data.sudah_aktif ? 'Aktif' : <Badge nada="peringatan">Menunggu undangan</Badge>}
           </Baris>
           <Baris label="Login terakhir">
             {login.data?.login_terakhir ? `${waktuSingkat(new Date(login.data.login_terakhir))} WIB` : login.isPending ? '…' : 'Belum pernah'}

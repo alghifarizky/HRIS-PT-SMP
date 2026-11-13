@@ -15,6 +15,7 @@ export type BarisKaryawan = {
   tanggal_masuk: string | null
   saldo_cuti: number | null
   aktif: boolean
+  tanggal_nonaktif: string | null
 }
 
 // shortcut: semua baris diambil sekali lalu disaring di browser — cukup untuk ±25 karyawan; pindah ke filter
@@ -25,7 +26,7 @@ export function useDaftarKaryawan() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('pengguna')
-        .select('id, nik, nama, email, jabatan, role, atasan_id, atasan:pengguna!atasan_id(nama), tanggal_masuk, saldo_cuti, aktif')
+        .select('id, nik, nama, email, jabatan, role, atasan_id, atasan:pengguna!atasan_id(nama), tanggal_masuk, saldo_cuti, aktif, tanggal_nonaktif')
         .order('nik', { nullsFirst: false })
         .order('nama')
       if (error) throw error
@@ -52,6 +53,9 @@ export type DetailKaryawan = {
   jumlah_tanggungan: number
   gaji_pokok: number | null
   saldo_cuti: number | null
+  tanggal_nonaktif: string | null
+  alasan_nonaktif: import('./label').AlasanNonaktif | null
+  catatan_nonaktif: string | null
 }
 
 /** Satu karyawan (detail & edit). No. KTP hanya versi tersamar — nomor lengkap lewat RPC lihat_ktp. */
@@ -62,7 +66,7 @@ export function useKaryawan(id: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('pengguna')
-        .select('id, email, nama, role, aktif, atasan_id, atasan:pengguna!atasan_id(nama), nik, jabatan, tanggal_lahir, alamat, tanggal_masuk, no_ktp_tersamar, status_menikah, jumlah_tanggungan, gaji_pokok, saldo_cuti')
+        .select('id, email, nama, role, aktif, atasan_id, atasan:pengguna!atasan_id(nama), nik, jabatan, tanggal_lahir, alamat, tanggal_masuk, no_ktp_tersamar, status_menikah, jumlah_tanggungan, gaji_pokok, saldo_cuti, tanggal_nonaktif, alasan_nonaktif, catatan_nonaktif')
         .eq('id', id!)
         .maybeSingle()
       if (error) throw error

@@ -133,7 +133,15 @@ export default function DaftarKaryawan() {
                       <td className="px-5 py-3">{k.atasan?.nama ?? '—'}</td>
                       <td className="px-5 py-3 whitespace-nowrap tabular-nums">{k.tanggal_masuk ? tanggalPendek(dariTanggalDb(k.tanggal_masuk)) : '—'}</td>
                       <td className="px-5 py-3 text-right whitespace-nowrap tabular-nums">{k.aktif && k.saldo_cuti != null ? `${k.saldo_cuti} hari` : '—'}</td>
-                      <td className="px-5 py-3">{k.aktif ? <Badge nada="sukses">Aktif</Badge> : <Badge nada="netral">Nonaktif</Badge>}</td>
+                      <td className="px-5 py-3">
+                        {!k.aktif ? (
+                          <Badge nada="netral">Nonaktif</Badge>
+                        ) : k.tanggal_nonaktif ? (
+                          <Badge nada="peringatan">Aktif s.d. {tanggalPendek(dariTanggalDb(k.tanggal_nonaktif))}</Badge>
+                        ) : (
+                          <Badge nada="sukses">Aktif</Badge>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

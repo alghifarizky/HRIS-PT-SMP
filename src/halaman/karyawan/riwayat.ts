@@ -2,6 +2,7 @@
 import { LABEL_PERAN } from '../../navigasi'
 import { dariTanggalDb, rupiah, tanggalPendek } from '../../lib/format'
 import type { Peran } from '../../auth/sesi'
+import { LABEL_ALASAN_NONAKTIF, type AlasanNonaktif } from './label'
 
 export type BarisLog = { aksi: 'insert' | 'update' | 'delete' | 'lihat_ktp'; nilai_lama: Record<string, unknown> | null; nilai_baru: Record<string, unknown> | null }
 export type Perubahan = { label: string; lama: string; baru: string }
@@ -10,6 +11,7 @@ const LABEL: Record<string, string> = {
   nama: 'Nama lengkap', email: 'Email', role: 'Peran', aktif: 'Status', atasan_id: 'Atasan langsung', nik: 'NIK karyawan',
   jabatan: 'Jabatan', tanggal_lahir: 'Tanggal lahir', alamat: 'Alamat', tanggal_masuk: 'Tanggal masuk', no_ktp: 'No. KTP',
   status_menikah: 'Status menikah', jumlah_tanggungan: 'Jumlah tanggungan', gaji_pokok: 'Gaji pokok', saldo_cuti: 'Saldo cuti',
+  tanggal_nonaktif: 'Aktif sampai', alasan_nonaktif: 'Alasan nonaktif', catatan_nonaktif: 'Catatan nonaktif',
 }
 const ABAIKAN = new Set(['id', 'no_ktp_tersamar']) // no_ktp_tersamar menggandakan no_ktp (sudah tersamar di log)
 
@@ -21,7 +23,8 @@ function nilai(kunci: string, v: unknown, namaPengguna: (id: string) => string):
     case 'atasan_id': return namaPengguna(String(v))
     case 'gaji_pokok': return rupiah(Number(v))
     case 'saldo_cuti': return `${v} hari`
-    case 'tanggal_lahir': case 'tanggal_masuk': return tanggalPendek(dariTanggalDb(String(v)))
+    case 'tanggal_lahir': case 'tanggal_masuk': case 'tanggal_nonaktif': return tanggalPendek(dariTanggalDb(String(v)))
+    case 'alasan_nonaktif': return LABEL_ALASAN_NONAKTIF[v as AlasanNonaktif] ?? String(v)
     case 'status_menikah': return v === 'menikah' ? 'Menikah' : 'Belum menikah'
     default: return String(v)
   }
