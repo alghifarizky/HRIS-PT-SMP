@@ -30,3 +30,10 @@ export const namaHari = (d: Date) => fmtHari.format(d)
 
 /** Tahun berjalan menurut WIB. */
 export const tahunIni = () => Number(new Intl.DateTimeFormat('en-CA', { timeZone: ZONA, year: 'numeric' }).format(new Date()))
+
+const fmtRupiah = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 })
+/** 4500000 → "Rp 4.500.000" */
+export const rupiah = (n: number) => `Rp ${fmtRupiah.format(n)}`
+
+/** Tanggal hari ini (WIB) sebagai "YYYY-MM-DD". */
+export const hariIniDb = () => new Intl.DateTimeFormat('en-CA', { timeZone: ZONA }).format(new Date())

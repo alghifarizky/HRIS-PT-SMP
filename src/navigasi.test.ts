@@ -27,3 +27,7 @@ describe('akses halaman per peran (UX)', () => {
     for (const ke of ['/beranda', '/absensi', '/pengajuan', '/slip', '/profil']) expect(boleh(ke)).toContain('hr')
   })
 })
+
+describe('tambah karyawan', () => {
+  it('hanya HR (Direksi lewat jalur darurat di detail)', () => expect(AKSES['/panel/karyawan/tambah']?.peran).toEqual(['hr']))
+})

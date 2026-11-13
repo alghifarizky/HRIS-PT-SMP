@@ -1,7 +1,7 @@
 // EMP-01 — desain B3A hal 4 (daftar), 5 (hasil cari kosong), 6 (memuat), 7 (galat); Direksi read-only B4 hal 27.
 // Saringan disimpan di URL (?q=&peran=&status=&hal=) — juga dipakai kolom "Cari karyawan" di top bar panel.
 import type { ReactNode } from 'react'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { ChevronLeft, ChevronRight, Plus, SearchX } from 'lucide-react'
 import { useProfil, type Peran } from '../../auth/sesi'
 import { LABEL_PERAN } from '../../navigasi'
@@ -50,10 +50,12 @@ export default function DaftarKaryawan() {
           )}
         </div>
         {peranSaya === 'hr' && (
-          // Form tambah dikerjakan di langkah 2.4b
-          <Tombol disabled title="Segera hadir">
+          <Link
+            to="/panel/karyawan/tambah"
+            className="fokus-ring flex h-11 items-center gap-2 rounded-kontrol bg-primer px-5 text-base font-semibold text-white hover:bg-primer-700"
+          >
             <Plus className="size-5" aria-hidden /> Tambah karyawan
-          </Tombol>
+          </Link>
         )}
       </div>
 

@@ -55,6 +55,8 @@ const dataBaru = (role, extra = {}) => ({
 // --- undang ---
 let r = await panggil(hr.klien, { aksi: 'undang', redirectTo: REDIRECT, data: { ...dataBaru('karyawan'), atasan_id: null } })
 cek(r.status === 400 && r.isi.galat.includes('Atasan'), 'Karyawan tanpa atasan ditolak sebelum email', JSON.stringify(r))
+r = await panggil(hr.klien, { aksi: 'undang', redirectTo: REDIRECT, data: { ...dataBaru('karyawan'), jabatan: null } })
+cek(r.status === 400 && r.isi.galat === 'Jabatan wajib diisi.', 'Karyawan tanpa jabatan ditolak', JSON.stringify(r))
 
 r = await panggil(hr.klien, { aksi: 'undang', redirectTo: 'https://jahat.test/atur-password', data: dataBaru('karyawan') })
 cek(r.status === 400 && r.isi.galat === 'Alamat aplikasi tidak diizinkan.', 'redirectTo ke domain lain ditolak', JSON.stringify(r))

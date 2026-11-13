@@ -3,11 +3,30 @@
 import { useState, type ComponentProps, type ReactNode } from 'react'
 import { CircleAlert, Eye, EyeOff } from 'lucide-react'
 
-export function Field({ id, label, galat, children }: { id: string; label: string; galat?: string; children: ReactNode }) {
+export function Field({
+  id,
+  label,
+  galat,
+  wajib,
+  bantuan,
+  children,
+}: {
+  id: string
+  label: string
+  galat?: string
+  wajib?: boolean
+  bantuan?: ReactNode
+  children: ReactNode
+}) {
   return (
     <div className="flex flex-col">
       <label htmlFor={id} className="text-sm leading-5 font-medium">
         {label}
+        {wajib && (
+          <span className="text-bahaya-ikon" aria-hidden>
+            {' '}*
+          </span>
+        )}
       </label>
       <div className="mt-2">{children}</div>
       {galat && (
@@ -16,6 +35,7 @@ export function Field({ id, label, galat, children }: { id: string; label: strin
           {galat}
         </p>
       )}
+      {bantuan && <p className="mt-1.5 text-[13px] leading-[18px] text-teks-sekunder">{bantuan}</p>}
     </div>
   )
 }

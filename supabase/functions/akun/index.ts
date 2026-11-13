@@ -55,6 +55,7 @@ const DataKaryawan = z
     }
     if (d.role === 'karyawan') wajib('atasan_id', 'Atasan langsung wajib diisi untuk peran Karyawan.')
     wajib('nik', 'NIK karyawan wajib diisi.')
+    wajib('jabatan', 'Jabatan wajib diisi.')
     wajib('gaji_pokok', 'Gaji pokok wajib diisi.')
     wajib('tanggal_masuk', 'Tanggal masuk wajib diisi.')
   })
