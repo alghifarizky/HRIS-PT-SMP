@@ -1,6 +1,8 @@
 -- Uji RLS, trigger & constraint tabel pengguna. Jalankan: npx supabase test db
 begin;
 select plan(30);
+-- Alasan perubahan wajib untuk gaji/peran/atasan (migrasi alasan_perubahan); header 'Uji otomatis'
+select set_config('request.headers', '{"x-alasan":"VWppIG90b21hdGlz"}', true);
 -- Seed lama tidak mengisi tanggal_masuk (wajib sejak trigger saldo awal); default hanya di transaksi uji
 alter table public.pengguna alter column tanggal_masuk set default '2020-01-01';
 

@@ -12,6 +12,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { CircleAlert, Info } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { skemaEmail } from '../../lib/validasi'
+import { HEADER_ALASAN, kodeAlasan } from '../../lib/alasan'
 import { jatahProporsional } from '../../lib/cuti'
 import { dariTanggalDb, hariIniDb, tahunIni, tanggalPendek } from '../../lib/format'
 import { LABEL_PERAN } from '../../navigasi'
@@ -39,6 +40,7 @@ const skema = z
     nik: z.string().trim().max(30, 'Maksimal 30 karakter.'),
     jabatan: z.string().trim().min(1, 'Jabatan wajib diisi.').max(100, 'Maksimal 100 karakter.'),
     tanggal_masuk: z.string(),
+    alasan: z.string().trim().max(200, 'Maksimal 200 karakter.'),
     gaji_pokok: z.union([z.number().min(0, 'Minimal Rp 0.').max(999_999_999_999, 'Nominal terlalu besar.'), z.nan()]),
   })
   .superRefine((v, ctx) => {
@@ -55,7 +57,7 @@ type Isian = z.infer<typeof skema>
 const LABEL_ISIAN: Record<keyof Isian, string> = {
   email: 'email', role: 'peran', atasan_id: 'atasan langsung', nama: 'nama lengkap', tanggal_lahir: 'tanggal lahir',
   no_ktp: 'No. KTP', status_menikah: 'status menikah', jumlah_tanggungan: 'jumlah tanggungan', alamat: 'alamat',
-  nik: 'NIK karyawan', jabatan: 'jabatan', tanggal_masuk: 'tanggal masuk', gaji_pokok: 'gaji pokok',
+  nik: 'NIK karyawan', jabatan: 'jabatan', tanggal_masuk: 'tanggal masuk', gaji_pokok: 'gaji pokok', alasan: 'alasan perubahan',
 }
 const daftarKalimat = (xs: string[]) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')}${xs.length > 2 ? ',' : ''} dan ${xs.at(-1)}`)
 const kosongJadiNull = (s: string) => (s.trim() ? s.trim() : null)
@@ -100,10 +102,16 @@ export default function FormKaryawan({ awal }: { awal?: DataKaryawan }) {
       email: awal?.email ?? '', role: awal?.role ?? 'karyawan', atasan_id: awal?.atasan_id ?? '', nama: awal?.nama ?? '',
       tanggal_lahir: awal?.tanggal_lahir ?? '', no_ktp: '', status_menikah: awal?.status_menikah ?? 'belum_menikah',
       jumlah_tanggungan: awal?.jumlah_tanggungan ?? 0, alamat: awal?.alamat ?? '', nik: awal?.nik ?? '', jabatan: awal?.jabatan ?? '',
-      tanggal_masuk: awal?.tanggal_masuk ?? '', gaji_pokok: awal?.gaji_pokok ?? NaN,
+      tanggal_masuk: awal?.tanggal_masuk ?? '', gaji_pokok: awal?.gaji_pokok ?? NaN, alasan: '',
     },
   })
-  const [role, tanggalMasuk] = useWatch({ control, name: ['role', 'tanggal_masuk'] })
+  const [role, tanggalMasuk, gajiPokok, atasanId] = useWatch({ control, name: ['role', 'tanggal_masuk', 'gaji_pokok', 'atasan_id'] })
+  // Alasan wajib bila gaji pokok, peran, atau atasan berubah (dijaga juga trigger wajib_alasan_pengguna)
+  const perluAlasan =
+    edit &&
+    (role !== awal.role ||
+      (role === 'direksi' ? '' : atasanId) !== (awal.atasan_id ?? '') ||
+      (role === 'direksi' || Number.isNaN(gajiPokok) ? null : gajiPokok) !== (awal.gaji_pokok == null ? null : Number(awal.gaji_pokok)))
   const direksi = role === 'direksi'
   const akunSendiri = awal?.id === idSaya
 
@@ -161,15 +169,19 @@ export default function FormKaryawan({ awal }: { awal?: DataKaryawan }) {
       return navigate('/panel/karyawan')
     }
 
-    const { data: hasil, error } = await supabase
+    if (perluAlasan && !v.alasan) {
+      return setError('alasan', { message: 'Alasan wajib diisi karena gaji pokok, peran, atau atasan berubah.' }, { shouldFocus: true })
+    }
+    const kueri = supabase
       .from('pengguna')
       .update({ ...data, ...(v.role !== awal.role ? { role: v.role } : {}) })
       .eq('id', awal.id)
-      .select('id')
+    if (v.alasan) kueri.setHeader(HEADER_ALASAN, kodeAlasan(v.alasan))
+    const { data: hasil, error } = await kueri.select('id')
     if (error) {
       // Pesan trigger DB sudah Bahasa Indonesia (mis. "Budi masih membawahi 3 karyawan. …")
       if (error.code === '23505') return tanganiPesan(error.message.includes('nik') ? 'NIK sudah dipakai karyawan lain.' : pesanGagal)
-      if (error.code === '23514' && /membawahi|Atasan langsung|Tanggal masuk/.test(error.message)) return setGalat(error.message)
+      if (error.code === '23514' && /membawahi|Atasan langsung|Tanggal masuk|Alasan/.test(error.message)) return setGalat(error.message)
       if (error.code === '42501') return setGalat('Anda tidak berwenang melakukan perubahan ini.')
       return setGalat(pesanGagal)
     }
@@ -333,6 +345,22 @@ export default function FormKaryawan({ awal }: { awal?: DataKaryawan }) {
               </Field>
             )}
           </Bagian>
+
+          {edit && (
+            <Bagian judul="Alasan perubahan">
+              <div className="col-span-3">
+                <Field
+                  id="alasan"
+                  label="Alasan perubahan"
+                  wajib={perluAlasan}
+                  galat={errors.alasan?.message}
+                  bantuan="Wajib bila gaji pokok, peran, atau atasan berubah. Tercatat di Riwayat perubahan."
+                >
+                  <textarea id="alasan" rows={2} placeholder="Contoh: Penyesuaian gaji tahunan 2026." aria-invalid={!!errors.alasan || undefined} className={`fokus-ring w-full rounded-kontrol border bg-permukaan px-4 py-3 text-[15px] placeholder:text-teks-3 ${errors.alasan ? 'border-bahaya-ikon' : 'border-garis'}`} {...register('alasan')} />
+                </Field>
+              </div>
+            </Bagian>
+          )}
 
           <div className="flex justify-end gap-3">
             <Tombol varian="sekunder" onClick={() => navigate(edit ? `/panel/karyawan/${awal.id}` : '/panel/karyawan')}>Batal</Tombol>

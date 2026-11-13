@@ -171,6 +171,8 @@ RLS bekerja per **baris**, bukan per kolom. Agar Atasan tidak melihat `no_ktp` &
 - `persetujuan` menyimpan siapa, kapan, keputusan, dan catatan.
 - `payroll` menyimpan `dibuat_oleh`, `disetujui_oleh`, `disetujui_pada`.
 - Tabel **`log_audit`** (MVP) diisi trigger pada INSERT/UPDATE/DELETE di `pengguna` dan `absensi`, juga perubahan status `payroll`. Kolom: `tabel`, `baris_id`, `aksi`, `nilai_lama` (jsonb), `nilai_baru` (jsonb), `oleh` (`auth.uid()`), `pada`.
+- Kolom `alasan`: dikirim client lewat header `x-alasan` (base64 UTF-8) pada permintaan yang sama; **wajib** (trigger) bila gaji pokok, peran, atau atasan karyawan berubah.
+- `no_ktp` tidak bisa di-SELECT dari client sama sekali (hak kolom dicabut); tampilan memakai kolom generated `no_ktp_tersamar`, nomor lengkap hanya lewat `lihat_ktp`.
 - Nilai `no_ktp` di `nilai_lama`/`nilai_baru` disamarkan (mis. `3201********0001`) agar log tidak menjadi jalur kebocoran.
 - Koreksi absensi oleh HR wajib mengisi `alasan_koreksi`; `dikoreksi_oleh` diisi otomatis.
 

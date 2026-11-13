@@ -8,12 +8,13 @@ import { supabase } from '../../lib/supabase'
 import { useProfil } from '../../auth/sesi'
 import { LABEL_PERAN } from '../../navigasi'
 import { dariTanggalDb, rupiah, tahunIni, tanggalPanjang, tanggalPendek, waktuSingkat } from '../../lib/format'
-import { BannerGalat, Tombol } from '../../komponen/form'
+import { BannerGalat, Field, Tombol } from '../../komponen/form'
 import { Badge, KeadaanGalat, KeadaanKosong, Skeleton } from '../../komponen/keadaan'
 import Dialog from '../../komponen/Dialog'
 import { useToast } from '../../komponen/toast'
 import { useDaftarKaryawan, useKaryawan, type DetailKaryawan as Detail } from './data'
 import { uraikanLog, type BarisLog } from './riwayat'
+import { HEADER_ALASAN, kodeAlasan } from '../../lib/alasan'
 
 const TAB = [
   { id: 'profil', label: 'Profil' },
@@ -242,12 +243,12 @@ function Riwayat({ id }: { id: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('log_audit')
-        .select('id, aksi, nilai_lama, nilai_baru, pada, pelaku:pengguna!oleh(nama, role)')
+        .select('id, aksi, nilai_lama, nilai_baru, alasan, pada, pelaku:pengguna!oleh(nama, role)')
         .eq('tabel', 'pengguna')
         .eq('baris_id', id)
         .order('pada', { ascending: false })
       if (error) throw error
-      return data as unknown as (BarisLog & { id: string; pada: string; pelaku: { nama: string; role: keyof typeof LABEL_PERAN } | null })[]
+      return data as unknown as (BarisLog & { id: string; pada: string; alasan: string | null; pelaku: { nama: string; role: keyof typeof LABEL_PERAN } | null })[]
     },
   })
   const namaPengguna = (pid: string) => daftar.data?.find((p) => p.id === pid)?.nama ?? '(tidak dikenal)'
@@ -282,6 +283,7 @@ function Riwayat({ id }: { id: string }) {
                       ))}
                     </ul>
                   )}
+                  {log.alasan && <p className="mt-1 text-sm text-teks-sekunder">Alasan: {log.alasan}</p>}
                 </div>
               </li>
             )
@@ -303,9 +305,16 @@ function Menyusul({ judul, fase }: { judul: string; fase: string }) {
 function DialogJadikanHr({ k, onTutup }: { k: Detail; onTutup: () => void }) {
   const qc = useQueryClient()
   const toast = useToast()
+  const [alasan, setAlasan] = useState('')
+  const [alasanKosong, setAlasanKosong] = useState(false)
   const m = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.from('pengguna').update({ role: 'hr' }).eq('id', k.id).select('id')
+      const { data, error } = await supabase
+        .from('pengguna')
+        .update({ role: 'hr' })
+        .eq('id', k.id)
+        .setHeader(HEADER_ALASAN, kodeAlasan(alasan))
+        .select('id')
       if (error) throw new Error(error.code === '23514' && /membawahi/.test(error.message) ? error.message : 'Peran gagal diubah. Periksa koneksi Anda, lalu coba lagi.')
       if (!data.length) throw new Error('Anda tidak berwenang mengubah peran karyawan ini.')
     },
@@ -321,6 +330,18 @@ function DialogJadikanHr({ k, onTutup }: { k: Detail; onTutup: () => void }) {
       <p className="text-[15px] leading-[22px] text-teks-sekunder">
         Gunakan hanya bila HR keluar tanpa serah terima. {k.nama} akan dapat mengelola data karyawan, absensi, dan payroll. Tindakan ini tercatat di Log audit.
       </p>
+      <div className="mt-4">
+        <Field id="alasan-hr" label="Alasan perubahan" wajib galat={alasanKosong ? 'Alasan wajib diisi.' : undefined}>
+          <textarea
+            id="alasan-hr"
+            rows={2}
+            value={alasan}
+            onChange={(e) => setAlasan(e.target.value)}
+            placeholder="Contoh: HR sebelumnya resign tanpa serah terima."
+            className="fokus-ring w-full rounded-kontrol border border-garis bg-permukaan px-4 py-3 text-[15px] placeholder:text-teks-3"
+          />
+        </Field>
+      </div>
       {m.isError && (
         <div className="mt-4">
           <BannerGalat>{m.error.message}</BannerGalat>
@@ -328,7 +349,7 @@ function DialogJadikanHr({ k, onTutup }: { k: Detail; onTutup: () => void }) {
       )}
       <div className="mt-6 flex justify-end gap-3">
         <Tombol varian="sekunder" onClick={onTutup}>Batal</Tombol>
-        <Tombol onClick={() => m.mutate()} memproses={m.isPending}>Ya, jadikan HR</Tombol>
+        <Tombol onClick={() => (alasan.trim() ? m.mutate() : setAlasanKosong(true))} memproses={m.isPending}>Ya, jadikan HR</Tombol>
       </div>
     </Dialog>
   )

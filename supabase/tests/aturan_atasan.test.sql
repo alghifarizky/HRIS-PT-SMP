@@ -1,6 +1,8 @@
 -- Uji aturan atasan & perubahan peran (2.4c). Jalankan: npx supabase test db
 begin;
 select plan(11);
+-- Alasan perubahan wajib untuk gaji/peran/atasan (migrasi alasan_perubahan); header 'Uji otomatis'
+select set_config('request.headers', '{"x-alasan":"VWppIG90b21hdGlz"}', true);
 alter table public.pengguna alter column tanggal_masuk set default '2020-01-01';
 
 insert into auth.users (id, email) values

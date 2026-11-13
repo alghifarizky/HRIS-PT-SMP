@@ -633,6 +633,7 @@ erDiagram
     enum aksi "insert, update, delete, lihat_ktp"
     jsonb nilai_lama
     jsonb nilai_baru
+    text alasan "wajib bila gaji/peran/atasan pengguna berubah"
     uuid oleh FK
     timestamptz pada
   }
