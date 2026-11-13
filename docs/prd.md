@@ -281,6 +281,7 @@ Nilai gaji pokok & tarif disalin ke slip saat payroll dibuat.
 | No. KTP | Dilindungi RLS + view terbatas (tanpa enkripsi tambahan); tampil tersamar, HR & Direksi bisa "Tampilkan" (tercatat di log audit) |
 | Karyawan nonaktif | Pengajuan Menunggu dibatalkan otomatis pada tanggal efektif |
 | Email aplikasi | Dikirim dari Gmail khusus aplikasi (`hris.ptsmp@gmail.com`) lewat SMTP; karyawan login dengan email pribadi masing-masing (satu email per orang). Notifikasi harian di dalam aplikasi, bukan email |
+| Absensi | Terlambat bila clock in > jam masuk jadwal + **5 menit** (07:05 tepat waktu, 07:06 terlambat; lama terlambat dihitung dari jam masuk jadwal). Pulang sebelum jam pulang boleh, ditampilkan "lebih cepat N menit". Clock in/out hanya untuk tanggal hari ini (WIB); di hari libur ditolak (dibuka untuk lembur hari libur yang disetujui di Fase 4). Koreksi HR: terlambat dihitung ulang, tanda auto clock out hilang bila jam keluar dikoreksi |
 | Jadwal kerja | Perubahan jadwal oleh HR langsung berlaku (bukan mulai hari berikutnya seperti teks desain) dan tercatat di log audit |
 | Pergantian HR | Normal: serah terima antar-HR (HR lama mendaftarkan HR baru, HR baru menonaktifkan HR lama). Darurat: Direksi (owner) menjadikan karyawan sebagai HR & menonaktifkan HR dari detail karyawan (keputusan Al, 13 Nov 2026). HR tetap boleh mengubah gaji & saldo cuti miliknya sendiri — diawasi lewat persetujuan payroll Direksi & log audit |
 
