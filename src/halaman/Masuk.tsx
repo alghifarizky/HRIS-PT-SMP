@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { Link } from 'react-router'
 import { supabase } from '../lib/supabase'
 import HalamanAuth from '../komponen/HalamanAuth'
+import { NAMA_APLIKASI } from '../lib/aplikasi'
 import { BannerGalat, Field, Input, InputPassword, Tombol } from '../komponen/form'
 import { skemaEmail } from '../lib/validasi'
 
@@ -36,7 +37,7 @@ export default function Masuk() {
       {/* Logo resmi menggantikan kotak "SMP" di desain (keputusan Al, 13 Nov 2026) */}
       <img src="/logo-smp.png" alt="Logo PT. Sumber Migas Pantara" width={56} height={56} className="size-14" />
 
-      <h1 className="mt-6 text-[28px] leading-[34px] font-bold">HRIS PT. SMP</h1>
+      <h1 className="mt-6 text-[28px] leading-[34px] font-bold">{NAMA_APLIKASI}</h1>
       <p className="mt-2 text-[15px] leading-[22px] text-teks-sekunder">Masuk dengan email pribadi yang sudah didaftarkan HR.</p>
 
       <form onSubmit={masuk} noValidate className="mt-8 flex flex-col gap-4">

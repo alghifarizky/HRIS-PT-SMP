@@ -3,6 +3,7 @@
 import { Link, matchPath, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { Laptop, LogOut, Search, User } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { NAMA_APLIKASI } from '../lib/aplikasi'
 import { useProfil } from '../auth/sesi'
 import { AKSES, LABEL_PERAN, NAV_PANEL, NAV_PANEL_BAWAH, NAV_PANEL_MOBILE_DIREKSI, type ItemNav } from '../navigasi'
 import { BottomNav, judulMobile, TombolNotifikasi, TopBarMobile } from './bagian'
@@ -33,7 +34,7 @@ export default function LayoutPanel() {
         <div className="flex h-16 items-center gap-3 px-5">
           <img src="/logo-smp.png" alt="" width={36} height={36} className="size-9" />
           <div>
-            <p className="text-[15px] leading-5 font-bold">HRIS PT. SMP</p>
+            <p className="text-[15px] leading-5 font-bold">{NAMA_APLIKASI}</p>
             <p className="text-xs leading-4 text-teks-sekunder">Panel {LABEL_PERAN[profil.role]}</p>
           </div>
         </div>

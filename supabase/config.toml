@@ -246,11 +246,11 @@ otp_expiry = 1800
 # Link email membawa token_hash ke /atur-password; token baru dipakai saat pengguna menekan
 # "Simpan password" — agar pemindai link / membuka di perangkat lain tidak menghabiskan link.
 [auth.email.template.invite]
-subject = "Undangan akun HRIS PT. SMP"
+subject = "Undangan akun HRIS PT SUMBER MIGAS PANTARA"
 content_path = "./supabase/templates/invite.html"
 
 [auth.email.template.recovery]
-subject = "Atur ulang password HRIS PT. SMP"
+subject = "Atur ulang password HRIS PT SUMBER MIGAS PANTARA"
 content_path = "./supabase/templates/recovery.html"
 
 # Uncomment to customize notification email template
@@ -448,4 +448,4 @@ port = 587
 user = "hris.ptsmp@gmail.com"
 pass = "env(SMTP_PASS)"
 admin_email = "hris.ptsmp@gmail.com"
-sender_name = "HRIS PT. SMP"
+sender_name = "HRIS PT SUMBER MIGAS PANTARA"

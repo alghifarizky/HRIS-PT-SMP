@@ -266,7 +266,7 @@ Nilai gaji pokok & tarif disalin ke slip saat payroll dibuat.
 
 | Topik | Keputusan |
 |---|---|
-| Nama | HRIS PT. SMP (judul aplikasi & kop slip) |
+| Nama | **HRIS PT SUMBER MIGAS PANTARA** (judul aplikasi & kop slip; diganti dari "HRIS PT. SMP" atas permintaan pengguna, 13 Nov 2026) |
 | Skala | ±25 karyawan |
 | Platform | Web app responsif + PWA. Jika kelak butuh GPS ketat, face recognition, atau rilis di store → bungkus dengan Capacitor |
 | Hosting | Vercel |
