@@ -26,11 +26,18 @@ const PESAN_ATURAN = /libur|sudah clock|Belum clock in|tidak aktif|Direksi/
 
 export default function ClockKamera() {
   const q = useAbsensiHariIni()
-  if (q.isPending) return <div className="min-h-dvh bg-teks p-6"><Skeleton baris={3} /></div>
-  if (q.isError) return <LayarGalat judul="Clock In" ikon={<CircleAlert />} teks="Data absensi gagal dimuat. Periksa koneksi Anda, lalu coba lagi." aksi={<Tombol onClick={() => q.refetch()}>Coba lagi</Tombol>} />
-  const { absensi, jadwal } = q.data
-  if (absensi?.jam_keluar) return <Navigate to="/beranda" replace /> // hari ini sudah lengkap
-  return <Alur mode={absensi ? 'keluar' : 'masuk'} jadwal={jadwal} />
+  // Mode dikunci dari data PERTAMA: setelah RPC berhasil data dimuat ulang (sudah ada jam masuk/keluar) —
+  // menurunkan mode ulang membuat layar sukses berganti mode / dialihkan ke Beranda (bug 13 Nov 2026).
+  const [awal, setAwal] = useState<{ mode: 'masuk' | 'keluar' | 'selesai'; jadwal: Jadwal | null } | null>(null)
+  if (q.data && !awal) {
+    const a = q.data.absensi
+    setAwal({ mode: a?.jam_keluar ? 'selesai' : a ? 'keluar' : 'masuk', jadwal: q.data.jadwal })
+  }
+
+  if (q.isError && !awal) return <LayarGalat judul="Clock In" ikon={<CircleAlert />} teks="Data absensi gagal dimuat. Periksa koneksi Anda, lalu coba lagi." aksi={<Tombol onClick={() => q.refetch()}>Coba lagi</Tombol>} />
+  if (!awal) return <div className="min-h-dvh bg-teks p-6"><Skeleton baris={3} /></div>
+  if (awal.mode === 'selesai') return <Navigate to="/beranda" replace /> // hari ini sudah lengkap
+  return <Alur mode={awal.mode} jadwal={awal.jadwal} />
 }
 
 function Alur({ mode, jadwal }: { mode: 'masuk' | 'keluar'; jadwal: Jadwal | null }) {
