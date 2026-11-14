@@ -20,7 +20,8 @@ Ringkasan diskusi perencanaan (claude.ai, 12 Nov 2026) untuk dilanjutkan di Clau
 | Fase 2 — master data & karyawan | ✅ (13 Nov 2026) — master data (jadwal, hari libur, pengaturan), log audit + alasan perubahan, Edge Function `akun` (undang / kirim ulang / ubah email), daftar–tambah–edit–detail karyawan, KTP hanya lewat `lihat_ktp`, nonaktif terjadwal (pg_cron 00:05 WIB) & aktif kembali, profil & ganti password. 121 uji pgTAP, 70 uji Vitest, uji integrasi `scripts/uji-akun-lokal.mjs` |
 | Akun uji tambahan | Karyawan & Atasan uji (`alghifarirzk+karyawan/+atasan@gmail.com`) dibuat lewat fitur tambah karyawan |
 | Deploy preview | ✅ Vercel `https://hris-pt-smp.vercel.app` (auto-deploy dari `main`); domain terdaftar di redirect URL Supabase & secret `APP_ORIGINS`. `site_url` masih `localhost:5173` sampai go-live |
-| Berikutnya | **Fase 3** — absensi + selfie + trigger terlambat + auto clock out (ATT-) |
+| Fase 3 — absensi | ✅ (14 Nov 2026) — clock in/out selfie (jam server, toleransi 5 menit, tolak hari libur & sebelum tanggal masuk), kartu Beranda, riwayat & detail (signed URL), absensi tim Atasan (RPC `anggota_tim`), rekap HR + koreksi/tambah manual (alasan via header → log), auto clock out 00:10 WIB, retensi selfie 12 bulan + foto yatim (Edge Function `bersihkan-selfie`, kunci di Vault). 178 uji pgTAP, 88 uji Vitest, 2 uji integrasi |
+| Berikutnya | **Fase 4** — lembur, cuti/sakit/izin, persetujuan, notifikasi (OT-, LV-, APR-, NTF-) |
 
 ---
 
@@ -41,6 +42,7 @@ Ikuti fase di `docs/prd.md` §9. Kerjakan satu langkah per giliran.
 **Catatan untuk fase berikutnya (13 Nov 2026)**
 - Fase 2: karyawan login dengan **email pribadi** (tidak ada email kantor). Di form tambah/edit karyawan, label desain "Email kantor" diganti "Email", contoh `nama@gmail.com`.
 - Fase 3: selfie butuh HTTPS (getUserMedia) — uji di HP perlu deploy preview (Vercel) atau tunnel HTTPS; `localhost` hanya di laptop.
+- Fase 4: clock in hari libur dibuka untuk lembur hari libur yang disetujui (RPC `catat_clock_in` & auto clock out hari tanpa jadwal); hari cuti tampil sesuai jenisnya di riwayat/absensi tim/rekap (bukan "Tanpa absensi"); kotak "Cuti/sakit/izin" di absensi tim; "termasuk lembur" di riwayat.
 - Fase 4: trigger `kelola_nonaktif` ditambah pembatalan pengajuan Menunggu; job reset saldo 1 Jan memberi jatah proporsional bagi yang masuk tahun itu; tampilkan "N hari terpakai" & "cuti menunggu" di profil/detail.
 - Fase 7: pecah chunk utama bundle (±580 kB / 170 kB gzip: Supabase, React, Router) — peringatan Vite > 500 kB sengaja ditunda.
 
