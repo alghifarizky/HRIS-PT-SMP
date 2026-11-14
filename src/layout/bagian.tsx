@@ -1,8 +1,8 @@
 // Potongan kerangka yang dipakai shell mobile & panel.
 import type { ReactNode } from 'react'
 import { Link, matchPath, NavLink } from 'react-router'
-import { Bell } from 'lucide-react'
-import { AKSES, type ItemNav } from '../navigasi'
+import { Bell, ChevronLeft } from 'lucide-react'
+import { AKSES, KEMBALI_MOBILE, type ItemNav } from '../navigasi'
 import { NAMA_APLIKASI } from '../lib/aplikasi'
 
 const ROOT = ['/beranda', '/panel']
@@ -36,14 +36,32 @@ export function BottomNav({ items }: { items: ItemNav[] }) {
 }
 
 /** Top app bar mobile: judul halaman (nama aplikasi di Beranda) + lonceng. */
-export function TopBarMobile({ ke, judul = NAMA_APLIKASI, ekstra }: { ke: string; judul?: string; ekstra?: ReactNode }) {
+/** Tujuan tombol ‹ untuk halaman turunan (null = halaman utama, tampil lonceng). */
+export function kembaliMobile(pathname: string) {
+  for (const [ke, tujuan] of Object.entries(KEMBALI_MOBILE)) {
+    const m = matchPath(ke, pathname)
+    if (m) return tujuan(m.params)
+  }
+  return null
+}
+
+export function TopBarMobile({ ke, judul = NAMA_APLIKASI, ekstra, kembali }: { ke: string; judul?: string; ekstra?: ReactNode; kembali?: string | null }) {
   return (
     <header className="sticky top-0 z-10 border-b border-garis bg-permukaan">
-      <div className="mx-auto flex h-14 max-w-[480px] items-center justify-between pr-2 pl-4">
-        <span className="min-w-0 truncate text-[17px] leading-6 font-bold">{judul}</span>
+      <div className={`mx-auto flex h-14 max-w-[480px] items-center justify-between pr-2 ${kembali ? 'pl-1' : 'pl-4'}`}>
+        <div className="flex min-w-0 items-center gap-1">
+          {kembali && (
+            <Link to={kembali} aria-label="Kembali" className="fokus-ring flex size-11 shrink-0 items-center justify-center rounded-kontrol">
+              <ChevronLeft className="size-6" aria-hidden />
+            </Link>
+          )}
+          {/* halaman turunan tidak punya judul sendiri — top bar menjadi h1-nya */}
+          {kembali ? <h1 className="min-w-0 truncate text-[17px] leading-6 font-bold">{judul}</h1>
+            : <span className="min-w-0 truncate text-[17px] leading-6 font-bold">{judul}</span>}
+        </div>
         <div className="flex items-center gap-1">
           {ekstra}
-          <TombolNotifikasi ke={ke} />
+          {!kembali && <TombolNotifikasi ke={ke} />}
         </div>
       </div>
     </header>

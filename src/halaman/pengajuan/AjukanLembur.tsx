@@ -4,15 +4,16 @@ import { useEffect, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Link, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronLeft, Info } from 'lucide-react'
+import { Info } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { dariTanggalDb, hariIniDb, tanggalPanjang } from '../../lib/format'
 import { jamWib } from '../../lib/absensi'
 import { jamValid, rapikanJam } from '../../lib/jadwal'
 import { cekLembur, teksDurasi } from '../../lib/pengajuan'
 import { BannerGalat, Field, Input, Tombol } from '../../komponen/form'
+import { InputTanggal } from '../../komponen/inputKhusus'
 import { useToast } from '../../komponen/toast'
 import type { Jadwal } from '../absensi/data'
 
@@ -91,11 +92,7 @@ export default function AjukanLembur() {
 
   return (
     <div>
-      <Link to="/pengajuan" className="fokus-ring -ml-2 inline-flex min-h-11 items-center gap-1 rounded-kontrol px-2 text-[15px] font-semibold text-primer">
-        <ChevronLeft className="size-5" aria-hidden /> Pengajuan
-      </Link>
-      <h1 className="mt-2 text-[22px] leading-7 font-semibold">Ajukan lembur</h1>
-      <form onSubmit={kirim} noValidate className="mt-4 flex flex-col gap-4">
+      <form onSubmit={kirim} noValidate className="flex flex-col gap-4">
         {hari.data && (
           <p className="flex gap-3 rounded-kartu bg-info-latar p-4 text-[15px] leading-[22px] text-info">
             <Info className="mt-0.5 size-5 shrink-0" aria-hidden />
@@ -112,7 +109,7 @@ export default function AjukanLembur() {
               ? `${tanggalPanjang(dariTanggalDb(tanggal))} · hari kerja ${jadwal.jam_masuk.slice(0, 5)}–${jadwal.jam_pulang.slice(0, 5)}`
               : `Hari libur (${hari.data.libur ?? 'Minggu'}) — dihitung sebagai lembur hari libur.`)}>
           {/* Safari iOS mengabaikan min — tanggal lampau juga ditolak cekLembur & server */}
-          <Input id="tanggal" type="date" min={hariIni} galat={!!galatTanggal} {...register('tanggal')} />
+          <InputTanggal id="tanggal" nilai={tanggal} min={hariIni} galat={!!galatTanggal} {...register('tanggal')} />
         </Field>
 
         <div className="grid grid-cols-2 gap-3">

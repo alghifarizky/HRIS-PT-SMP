@@ -2,7 +2,7 @@
 import { Link, Outlet, useLocation } from 'react-router'
 import { useProfil } from '../auth/sesi'
 import { NAV_MOBILE } from '../navigasi'
-import { BottomNav, judulMobile, TopBarMobile } from './bagian'
+import { BottomNav, judulMobile, kembaliMobile, TopBarMobile } from './bagian'
 
 export default function LayoutMobile() {
   const { role } = useProfil().data!
@@ -12,6 +12,7 @@ export default function LayoutMobile() {
       <TopBarMobile
         ke="/notifikasi"
         judul={judulMobile(pathname)}
+        kembali={kembaliMobile(pathname)}
         ekstra={
           // Tidak ada di desain: jalan pulang HR dari "Akun saya" ke panel
           role === 'hr' && (

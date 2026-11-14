@@ -51,6 +51,13 @@ export const halamanAwal = (peran: Peran) => (peran === 'hr' || peran === 'direk
 
 export const LABEL_PERAN: Record<Peran, string> = { karyawan: 'Karyawan', atasan: 'Atasan', hr: 'HR', direksi: 'Direksi' }
 
+/** Halaman mobile dengan tombol ‹ di top bar (tanpa lonceng) — B1 hal 28–39. Tujuan dari parameter rute. */
+export const KEMBALI_MOBILE: Record<string, (p: Record<string, string | undefined>) => string> = {
+  '/pengajuan/lembur/ajukan': () => '/pengajuan',
+  '/pengajuan/cuti/ajukan': () => '/pengajuan?tab=cuti',
+  '/pengajuan/:jenis/:id': (p) => (p.jenis === 'cuti' ? '/pengajuan?tab=cuti' : '/pengajuan'),
+}
+
 /** Siapa boleh membuka tiap halaman (UX saja — keamanan di RLS). Diturunkan dari menu + pengecualian. */
 export const AKSES: Record<string, { label: string; peran: Peran[] }> = (() => {
   const akses: Record<string, { label: string; peran: Peran[] }> = {}
@@ -79,7 +86,7 @@ export const AKSES: Record<string, { label: string; peran: Peran[] }> = (() => {
     tambah({ ke: '/clock', label: 'Clock' }, r) // layar penuh kamera, di luar shell mobile
     tambah({ ke: '/absensi/:tanggal', label: 'Detail absensi' }, r)
     tambah({ ke: '/pengajuan/lembur/ajukan', label: 'Ajukan lembur' }, r)
-    tambah({ ke: '/pengajuan/cuti/ajukan', label: 'Ajukan cuti/sakit/izin' }, r)
+    tambah({ ke: '/pengajuan/cuti/ajukan', label: 'Ajukan cuti / sakit / izin' }, r)
     tambah({ ke: '/pengajuan/:jenis/:id', label: 'Detail pengajuan' }, r)
   }
   return akses

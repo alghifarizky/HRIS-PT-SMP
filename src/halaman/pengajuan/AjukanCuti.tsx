@@ -1,20 +1,21 @@
 // LV-01–03, LV-05 — Ajukan cuti / sakit / izin (B1 hal 29 normal, hal 30 saldo tidak cukup).
 // Hitungan & aturan dicerminkan di form; penentu akhir RPC ajukan_cuti. Lampiran diunggah dulu, dihapus lagi bila
 // pengajuan ditolak server (policy lampiran_hapus_yatim).
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Link, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronLeft, CircleAlert, FileText, Upload, X } from 'lucide-react'
+import { CircleAlert, FileText, Upload, X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useProfil } from '../../auth/sesi'
 import { dariTanggalDb, hariIniDb, tanggalPanjang } from '../../lib/format'
 import { tambahHari } from '../../lib/absensi'
 import { hariKerjaKe, hariKerjaMundur, ringkasCuti, type JenisCuti, type Kalender } from '../../lib/pengajuan'
 import { siapkanLampiran, ukuranFile } from '../../lib/lampiran'
-import { BannerGalat, Field, Input, Tombol } from '../../komponen/form'
+import { BannerGalat, Field, Tombol } from '../../komponen/form'
+import { InputTanggal } from '../../komponen/inputKhusus'
 import { KeadaanGalat, Skeleton } from '../../komponen/keadaan'
 import { useToast } from '../../komponen/toast'
 
@@ -53,19 +54,14 @@ function useDataCuti() {
 
 export default function AjukanCuti() {
   const q = useDataCuti()
-  const kembali = (
-    <Link to="/pengajuan?tab=cuti" className="fokus-ring -ml-2 inline-flex min-h-11 items-center gap-1 rounded-kontrol px-2 text-[15px] font-semibold text-primer">
-      <ChevronLeft className="size-5" aria-hidden /> Pengajuan
-    </Link>
-  )
-  if (q.isPending) return <>{kembali}<Skeleton baris={6} /></>
-  if (q.isError) return <>{kembali}<KeadaanGalat judul="Data saldo & kalender gagal dimuat" onCobaLagi={() => q.refetch()} /></>
-  return <Form data={q.data} kembali={kembali} />
+  if (q.isPending) return <Skeleton baris={6} />
+  if (q.isError) return <KeadaanGalat judul="Data saldo & kalender gagal dimuat" onCobaLagi={() => q.refetch()} />
+  return <Form data={q.data} />
 }
 
 type Lampiran = { blob: Blob; ext: string; nama: string }
 
-function Form({ data, kembali }: { data: NonNullable<ReturnType<typeof useDataCuti>['data']>; kembali: ReactNode }) {
+function Form({ data }: { data: NonNullable<ReturnType<typeof useDataCuti>['data']> }) {
   const hariIni = hariIniDb()
   const uid = useProfil().data!.id
   const navigate = useNavigate()
@@ -130,9 +126,7 @@ function Form({ data, kembali }: { data: NonNullable<ReturnType<typeof useDataCu
 
   return (
     <div>
-      {kembali}
-      <h1 className="mt-2 text-[22px] leading-7 font-semibold">Ajukan cuti / sakit / izin</h1>
-      <form onSubmit={kirim} noValidate className="mt-4 flex flex-col gap-4">
+      <form onSubmit={kirim} noValidate className="flex flex-col gap-4">
         {galatServer && <BannerGalat>{galatServer}</BannerGalat>}
         <div role="radiogroup" aria-label="Jenis pengajuan" className="grid grid-cols-3 gap-1 rounded-kartu bg-latar p-1">
           {(['cuti', 'sakit', 'izin'] as const).map((j) => (
@@ -146,10 +140,10 @@ function Form({ data, kembali }: { data: NonNullable<ReturnType<typeof useDataCu
         <div className="grid grid-cols-2 gap-3">
           <Field id="mulai" label="Tanggal mulai" wajib galat={galatMulai}>
             {/* Safari iOS mengabaikan min — dicek juga di atas & di server */}
-            <Input id="mulai" type="date" min={paling} galat={!!galatMulai} {...register('mulai')} />
+            <InputTanggal id="mulai" nilai={mulai} min={paling} galat={!!galatMulai} {...register('mulai')} />
           </Field>
           <Field id="selesai" label="Tanggal selesai" wajib galat={galatSelesai}>
-            <Input id="selesai" type="date" min={mulai} galat={!!galatSelesai} {...register('selesai')} />
+            <InputTanggal id="selesai" nilai={selesai} min={mulai} galat={!!galatSelesai} {...register('selesai')} />
           </Field>
         </div>
 

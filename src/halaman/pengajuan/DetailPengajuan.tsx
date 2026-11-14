@@ -1,8 +1,8 @@
 // OT-04, LV-06 — Detail pengajuan sendiri + alur persetujuan (B1 hal 37 menunggu, 38 disetujui, 39 konfirmasi batal).
 // Tingkat yang belum diputuskan menampilkan peran penyetuju (nama baru tersimpan saat keputusan).
 import { useState, type ReactNode } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
-import { Check, ChevronLeft, Clock, X } from 'lucide-react'
+import { useNavigate, useParams } from 'react-router'
+import { Check, Clock, X } from 'lucide-react'
 import { useProfil } from '../../auth/sesi'
 import { dariTanggalDb, tanggalPanjang, waktuSingkat } from '../../lib/format'
 import { durasiJam, LABEL_JENIS_CUTI, LABEL_STATUS, NADA_STATUS, rentangTanggal } from '../../lib/pengajuan'
@@ -18,15 +18,10 @@ export default function DetailPengajuan() {
   const profil = useProfil().data!
   const q = useDetailPengajuan(jenis, id!)
   const [konfirmasi, setKonfirmasi] = useState(false)
-  const kembali = (
-    <Link to={`/pengajuan${jenis === 'cuti' ? '?tab=cuti' : ''}`} className="fokus-ring -ml-2 inline-flex min-h-11 items-center gap-1 rounded-kontrol px-2 text-[15px] font-semibold text-primer">
-      <ChevronLeft className="size-5" aria-hidden /> Pengajuan
-    </Link>
-  )
-  if (q.isPending) return <>{kembali}<Skeleton baris={6} /></>
-  if (q.isError) return <>{kembali}<KeadaanGalat judul="Detail pengajuan gagal dimuat" onCobaLagi={() => q.refetch()} /></>
+  if (q.isPending) return <Skeleton baris={6} />
+  if (q.isError) return <KeadaanGalat judul="Detail pengajuan gagal dimuat" onCobaLagi={() => q.refetch()} />
   const p = q.data
-  if (!p) return <>{kembali}<KeadaanKosong judul="Pengajuan tidak ditemukan" pesan="Pengajuan ini tidak ada atau bukan milik Anda." /></>
+  if (!p) return <KeadaanKosong judul="Pengajuan tidak ditemukan" pesan="Pengajuan ini tidak ada atau bukan milik Anda." />
 
   const lembur = jenis === 'lembur' ? (p as Lembur) : null
   const cuti = jenis === 'cuti' ? (p as Cuti) : null
@@ -39,12 +34,11 @@ export default function DetailPengajuan() {
 
   return (
     <div className="flex flex-col gap-4">
-      {kembali}
       <section className="rounded-kartu border border-garis bg-permukaan p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-sm text-teks-sekunder tabular-nums">{p.nomor}</p>
-            <h1 className="text-[22px] leading-7 font-semibold">{lembur ? 'Lembur' : LABEL_JENIS_CUTI[cuti!.jenis]}</h1>
+            <h2 className="text-[22px] leading-7 font-semibold">{lembur ? 'Lembur' : LABEL_JENIS_CUTI[cuti!.jenis]}</h2>
           </div>
           <Badge nada={NADA_STATUS[p.status]}>{LABEL_STATUS[p.status]}</Badge>
         </div>
