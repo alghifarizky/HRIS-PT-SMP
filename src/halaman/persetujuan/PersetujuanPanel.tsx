@@ -38,45 +38,48 @@ export default function PersetujuanPanel() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div>
-        <h1 className="hidden text-[28px] leading-[34px] font-bold lg:block">{direksi ? 'Persetujuan Direksi' : 'Persetujuan tingkat 2'}</h1>
+      <div className="hidden lg:block">
+        <h1 className="text-[28px] leading-[34px] font-bold">{direksi ? 'Persetujuan Direksi' : 'Persetujuan tingkat 2'}</h1>
         <p className="mt-1 text-[15px] text-teks-sekunder">
-          <span className="hidden lg:inline">{tanggalPanjang(dariTanggalDb(hariIniDb()))} · </span>
+          {tanggalPanjang(dariTanggalDb(hariIniDb()))} ·{' '}
           {direksi ? 'pengajuan Atasan dan HR · keputusan Anda langsung final' : 'pengajuan karyawan yang sudah disetujui atasan'}
         </p>
       </div>
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-garis">
-        <div role="tablist" aria-label="Jenis pengajuan" className="flex gap-2">
+      {/* HP: tab selebar layar di bawah top bar, Menunggu/Riwayat penuh (B4 hal 47); laptop: satu baris (B4 hal 2) */}
+      <div className="-mx-4 -mt-6 flex flex-col gap-4 lg:mx-0 lg:mt-0 lg:flex-row lg:flex-wrap lg:items-end lg:justify-between lg:border-b lg:border-garis">
+        <div role="tablist" aria-label="Jenis pengajuan" className="grid grid-cols-2 border-b border-garis bg-permukaan lg:flex lg:gap-2 lg:border-0 lg:bg-transparent">
           {(['lembur', 'cuti'] as const).map((t) => (
             <button key={t} role="tab" type="button" aria-selected={tab === t} onClick={() => { atur(t, riwayat); setPilih(null) }}
-              className={`fokus-ring -mb-px h-11 border-b-2 px-3 text-[15px] font-semibold ${tab === t ? 'border-primer text-primer' : 'border-transparent text-teks-sekunder'}`}>
+              className={`fokus-ring -mb-px h-12 border-b-2 px-3 text-[15px] font-semibold lg:h-11 ${tab === t ? 'border-primer text-primer' : 'border-transparent text-teks-sekunder'}`}>
               {t === 'lembur' ? 'Lembur' : 'Cuti / Sakit / Izin'}
               {!!q.data?.menunggu[t].length && <span className="ml-1.5 tabular-nums">{q.data.menunggu[t].length}</span>}
             </button>
           ))}
         </div>
-        <div className="mb-2 grid grid-cols-2 gap-1 rounded-kontrol bg-garis p-1">
+        <div className="mx-4 grid grid-cols-2 gap-1 rounded-kartu bg-garis p-1 lg:mx-0 lg:mb-2 lg:rounded-kontrol">
           {[false, true].map((r) => (
             <button key={String(r)} type="button" aria-pressed={riwayat === r} onClick={() => { atur(tab, r); setPilih(null) }}
-              className={`fokus-ring h-9 rounded-[6px] px-4 text-sm font-semibold ${riwayat === r ? 'bg-permukaan shadow-sm' : 'text-teks-sekunder'}`}>
+              className={`fokus-ring h-11 rounded-kontrol px-4 text-[15px] font-semibold lg:h-9 lg:rounded-[6px] lg:text-sm ${riwayat === r ? 'bg-permukaan shadow-sm' : 'text-teks-sekunder'}`}>
               {r ? 'Riwayat' : 'Menunggu'}
             </button>
           ))}
         </div>
       </div>
+      <p className="-my-2 text-sm text-teks-sekunder lg:hidden">
+        {riwayat ? 'Keputusan Anda adalah status final pengajuan' : direksi ? 'Pengaju Atasan/HR · keputusan Anda langsung final' : 'Diurutkan dari yang paling lama menunggu'}
+      </p>
 
-      <div className="overflow-hidden rounded-kartu border border-garis bg-permukaan">
-        {q.isPending ? <Skeleton baris={6} />
-          : q.isError ? <KeadaanGalat judul="Persetujuan gagal dimuat" onCobaLagi={() => q.refetch()} />
-          : !daftar.length ? (riwayat
+      {q.isPending ? <Kotak><Skeleton baris={6} /></Kotak>
+        : q.isError ? <Kotak><KeadaanGalat judul="Persetujuan gagal dimuat" onCobaLagi={() => q.refetch()} /></Kotak>
+        : !daftar.length ? <Kotak>{riwayat
             ? <KeadaanKosong judul="Belum ada riwayat keputusan" pesan="Pengajuan yang sudah Anda setujui atau tolak akan muncul di sini." />
-            : <KeadaanKosong judul="Tidak ada pengajuan yang menunggu" pesan={direksi ? 'Pengajuan lembur & cuti dari Atasan dan HR akan muncul di sini.' : 'Pengajuan karyawan yang sudah disetujui atasan akan muncul di sini.'} />)
-          : (<>
-            {/* HP (Direksi < 1024 px, B4 hal 47): kartu; laci detail tampil layar penuh */}
-            <ul className="divide-y divide-garis lg:hidden">
+            : <KeadaanKosong judul="Tidak ada pengajuan yang menunggu" pesan={direksi ? 'Pengajuan lembur & cuti dari Atasan dan HR akan muncul di sini.' : 'Pengajuan karyawan yang sudah disetujui atasan akan muncul di sini.'} />}</Kotak>
+        : (<>
+            {/* HP (Direksi < 1024 px, B4 hal 47): kartu terpisah; laci detail tampil layar penuh */}
+            <ul className="flex flex-col gap-3 lg:hidden">
               {daftar.map((x) => (
                 <li key={x.id}>
-                  <button type="button" onClick={() => setPilih(x.id)} className="fokus-ring flex w-full gap-3 p-4 text-left hover:bg-latar">
+                  <button type="button" onClick={() => setPilih(x.id)} className="fokus-ring flex w-full gap-3 rounded-kartu border border-garis bg-permukaan p-4 text-left hover:bg-latar">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primer-100 text-sm font-semibold text-primer" aria-hidden>{inisial(x.pengguna.nama)}</span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-start justify-between gap-2">
@@ -86,15 +89,15 @@ export default function PersetujuanPanel() {
                         </span>
                         {riwayat && ((x as ItemRiwayat).keputusan === 'disetujui' ? <Badge nada="sukses">Disetujui</Badge> : <Badge nada="bahaya">Ditolak</Badge>)}
                       </span>
-                      <span className="mt-2 block"><Jenis jenis={tab} x={x} /></span>
-                      <span className="block text-[15px]"><TanggalDurasi jenis={tab} x={x} /></span>
+                      <span className="mt-2 block font-semibold"><Jenis jenis={tab} x={x} /></span>
+                      <span className="block text-[15px]">{ringkasTanggal(tab, x)}</span>
                       {!riwayat && <span className="mt-1 block text-sm text-teks-sekunder">Diajukan {pendek(x.diajukan_pada)}</span>}
                     </span>
                   </button>
                 </li>
               ))}
             </ul>
-            <div className="hidden overflow-x-auto lg:block">
+            <Kotak className="hidden lg:block"><div className="overflow-x-auto">
               <table className="w-full text-left text-[15px]">
                 <thead className="text-[13px] font-semibold tracking-wide text-teks-sekunder uppercase">
                   <tr className="border-b border-garis">
@@ -138,16 +141,29 @@ export default function PersetujuanPanel() {
                   })}
                 </tbody>
               </table>
-            </div>
+            </div></Kotak>
           </>)}
-      </div>
-      <p className="text-sm text-teks-sekunder">
+      <p className="hidden text-sm text-teks-sekunder lg:block">
         {riwayat ? `Keputusan ${direksi ? 'Direksi' : 'tingkat 2'} adalah status final pengajuan.` : 'Urutan: paling lama menunggu di atas. Klik baris untuk meninjau.'}
       </p>
 
       {terpilih && <LaciDetail key={terpilih.id} jenis={tab} x={terpilih} bisaPutuskan={!riwayat} onTutup={() => setPilih(null)} />}
     </div>
   )
+}
+
+function Kotak({ className = '', children }: { className?: string; children: ReactNode }) {
+  return <div className={`overflow-hidden rounded-kartu border border-garis bg-permukaan ${className}`}>{children}</div>
+}
+
+/** Satu baris untuk kartu HP: "Sab, 14 Nov 2026 · 12:00 – 15:00 · 3 jam" / "Sen, 21 Des – Sel, 22 Des 2026 · 2 hari kerja" */
+function ringkasTanggal(jenis: JenisPengajuan, x: ItemPanel) {
+  if (jenis === 'lembur') {
+    const l = x as ItemPanel<Lembur>
+    return `${tanggalSingkat(dariTanggalDb(l.tanggal))} · ${l.jam_mulai.slice(0, 5)} – ${l.jam_selesai.slice(0, 5)} · ${durasiJam(l.jam_mulai, l.jam_selesai)}`
+  }
+  const c = x as ItemPanel<Cuti>
+  return `${rentangTanggal(c.tanggal_mulai, c.tanggal_selesai, true)} · ${c.jumlah_hari} hari kerja`
 }
 
 function Jenis({ jenis, x }: { jenis: JenisPengajuan; x: ItemPanel }) {
