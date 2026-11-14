@@ -128,7 +128,7 @@ function Form({ data }: { data: NonNullable<ReturnType<typeof useDataCuti>['data
     <div>
       <form onSubmit={kirim} noValidate className="flex flex-col gap-4">
         {galatServer && <BannerGalat>{galatServer}</BannerGalat>}
-        <div role="radiogroup" aria-label="Jenis pengajuan" className="grid grid-cols-3 gap-1 rounded-kartu bg-latar p-1">
+        <div role="radiogroup" aria-label="Jenis pengajuan" className="grid grid-cols-3 gap-1 rounded-kartu bg-garis p-1">
           {(['cuti', 'sakit', 'izin'] as const).map((j) => (
             <label key={j} className={`fokus-ring flex h-11 cursor-pointer items-center justify-center rounded-kontrol text-[15px] font-semibold has-focus-visible:ring-2 ${jenis === j ? 'bg-permukaan text-teks shadow-sm' : 'text-teks-sekunder'}`}>
               <input type="radio" value={j} className="sr-only" {...register('jenis')} />
