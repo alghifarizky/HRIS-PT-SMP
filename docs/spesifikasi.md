@@ -548,6 +548,10 @@ erDiagram
     bool auto_clock_out
     uuid dikoreksi_oleh FK
     text alasan_koreksi
+    timestamptz jam_masuk_semula "sebelum koreksi pertama (trigger)"
+    timestamptz jam_keluar_semula "sebelum koreksi pertama (trigger)"
+    timestamptz dikoreksi_pada "trigger"
+    text dikoreksi_oleh_nama "salinan nama HR (trigger)"
   }
   pengajuan_lembur {
     uuid id PK
