@@ -11,6 +11,7 @@ import { Link, useNavigate } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { CircleAlert, Info } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { urlAturPassword } from '../../lib/aplikasi'
 import { skemaEmail } from '../../lib/validasi'
 import { HEADER_ALASAN, kodeAlasan } from '../../lib/alasan'
 import { jatahProporsional } from '../../lib/cuti'
@@ -160,7 +161,7 @@ export default function FormKaryawan({ awal }: { awal?: DataKaryawan }) {
 
     if (!edit) {
       const { error } = await supabase.functions.invoke('akun', {
-        body: { aksi: 'undang', redirectTo: `${window.location.origin}/atur-password`, data: { ...data, email: v.email, role: v.role } },
+        body: { aksi: 'undang', redirectTo: urlAturPassword(), data: { ...data, email: v.email, role: v.role } },
       })
       if (error) return tanganiPesan(await pesanFungsi(error))
       await qc.invalidateQueries({ queryKey: ['karyawan'] })

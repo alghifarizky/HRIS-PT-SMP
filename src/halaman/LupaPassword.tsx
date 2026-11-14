@@ -7,6 +7,7 @@ import { Link } from 'react-router'
 import { Mail } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { skemaEmail } from '../lib/validasi'
+import { urlAturPassword } from '../lib/aplikasi'
 import HalamanAuth from '../komponen/HalamanAuth'
 import { BannerGalat, Field, Input, Tombol } from '../komponen/form'
 
@@ -17,7 +18,7 @@ const JEDA_KIRIM_ULANG = 60 // detik — sama dengan auth.email.max_frequency
 
 async function kirimLink(email: string) {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/atur-password`,
+    redirectTo: urlAturPassword(),
   })
   if (!error) return null
   return error.code === 'over_email_send_rate_limit'

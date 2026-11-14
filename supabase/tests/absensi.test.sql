@@ -1,6 +1,6 @@
 -- Uji absensi (Fase 3.1). Waktu ditentukan lewat fungsi inti catat_* agar tidak bergantung hari ini.
 begin;
-select plan(33);
+select plan(34);
 alter table public.pengguna alter column tanggal_masuk set default '2020-01-01';
 
 insert into auth.users (id, email) values
@@ -104,6 +104,9 @@ select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000
 select is((public.catat_clock_in('00000000-0000-0000-0000-0000000000a1', '00000000-0000-0000-0000-0000000000a1/2026-11-12-a.jpg', '2026-11-12 06:58+07')).dikoreksi_oleh,
   null, 'Clock in HR sendiri tidak tercatat sebagai koreksi');
 select is((select count(*)::int from cron.job where jobname = 'auto-clock-out' and schedule = '10 17 * * *'), 1, 'Job auto clock out 00:10 WIB');
+update public.pengguna set tanggal_masuk = '2026-11-16' where nama = 'Dimas';
+select throws_ok($$ select public.catat_clock_in('00000000-0000-0000-0000-0000000000c2', '00000000-0000-0000-0000-0000000000c2/2026-11-12-a.jpg', '2026-11-13 07:00+07') $$,
+  '23514', 'Anda baru bisa clock in mulai 16 Nov 2026', 'Clock in sebelum tanggal masuk ditolak');
 
 select * from finish();
 rollback;

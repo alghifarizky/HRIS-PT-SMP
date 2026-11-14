@@ -5,6 +5,7 @@ import { useState, type ReactNode } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { urlAturPassword } from '../../lib/aplikasi'
 import { useProfil } from '../../auth/sesi'
 import { LABEL_PERAN } from '../../navigasi'
 import { dariTanggalDb, rupiah, tahunIni, tanggalPanjang, tanggalPendek, waktuSingkat } from '../../lib/format'
@@ -195,7 +196,7 @@ function Profil({ k }: { k: Detail }) {
   const kirimUlang = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.functions.invoke('akun', {
-        body: { aksi: 'kirim_ulang', redirectTo: `${window.location.origin}/atur-password`, id: k.id },
+        body: { aksi: 'kirim_ulang', redirectTo: urlAturPassword(), id: k.id },
       })
       if (error) {
         const isi = await (error as { context?: Response }).context?.json?.().catch(() => null)

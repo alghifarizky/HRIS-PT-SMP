@@ -22,7 +22,7 @@ type Tahap =
   | { jenis: 'galat'; sebab: 'izin' | 'tanpa_kamera' | 'offline' | 'ditolak'; pesan?: string }
 
 // Pesan aturan dari RPC (Bahasa Indonesia) yang ditampilkan apa adanya
-const PESAN_ATURAN = /libur|sudah clock|Belum clock in|tidak aktif|Direksi/
+const PESAN_ATURAN = /libur|sudah clock|Belum clock in|baru bisa clock in|tidak aktif|Direksi/
 
 export default function ClockKamera() {
   const q = useAbsensiHariIni()
