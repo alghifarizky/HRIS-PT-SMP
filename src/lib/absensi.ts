@@ -26,7 +26,7 @@ export function durasi(dari: Date, sampai: Date) {
 type AbsensiRingkas = { tanggal: string; jam_masuk: string; jam_keluar: string | null; terlambat: boolean; auto_clock_out: boolean }
 export type BarisRiwayat<A> = { tanggal: string; absensi: A | null }
 
-const tambahHari = (tgl: string, n: number) => {
+export const tambahHari = (tgl: string, n: number) => {
   const d = new Date(`${tgl}T00:00:00Z`)
   d.setUTCDate(d.getUTCDate() + n)
   return d.toISOString().slice(0, 10)

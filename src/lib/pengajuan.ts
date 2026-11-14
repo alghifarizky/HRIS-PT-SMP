@@ -1,5 +1,6 @@
 // Format & label pengajuan lembur / cuti-sakit-izin (B1 hal 31–39).
 import { dariTanggalDb } from './format'
+import { hariIso, tambahHari } from './absensi'
 
 export type StatusPengajuan = 'menunggu' | 'disetujui' | 'ditolak' | 'dibatalkan'
 export type JenisCuti = 'cuti' | 'sakit' | 'izin'
@@ -50,4 +51,33 @@ export function cekLembur(p: { tanggal: string; mulai: string; selesai: string; 
   if (menit <= 0) galat.selesai = 'Jam selesai harus setelah jam mulai.'
   else if (menit % 30) galat.selesai = 'Durasi lembur harus kelipatan 30 menit.'
   return { menit, galat }
+}
+
+// ---------------- Cuti / sakit / izin (cermin hitung_hari_kerja & hari_kerja_mundur di SQL) ----------------
+export type Kalender = { hariKerja: Set<number>; libur: Map<string, string> }
+const hariKerja = (tgl: string, k: Kalender) => k.hariKerja.has(hariIso(tgl)) && !k.libur.has(tgl)
+
+/** Jumlah hari kerja dalam [mulai, selesai] + hari yang tidak dihitung ("Jum 25 Des (Natal)", "Min 27 Des"). */
+export function ringkasCuti(mulai: string, selesai: string, k: Kalender) {
+  let jumlah = 0
+  const tidakDihitung: string[] = []
+  for (let t = mulai; t <= selesai; t = tambahHari(t, 1)) {
+    if (hariKerja(t, k)) jumlah++
+    else tidakDihitung.push(`${fHari.format(dariTanggalDb(t))} ${fTglBln.format(dariTanggalDb(t))}${k.libur.has(t) ? ` (${k.libur.get(t)})` : ''}`)
+  }
+  return { jumlah, tidakDihitung }
+}
+
+/** Tanggal hari kerja ke-n mulai `mulai` (batas tanggal selesai agar cukup saldo). null bila n < 1. */
+export function hariKerjaKe(mulai: string, n: number, k: Kalender) {
+  if (n < 1) return null
+  for (let t = mulai, i = 0; i < 400; t = tambahHari(t, 1), i++) if (hariKerja(t, k) && --n === 0) return t
+  return null
+}
+
+/** Hari kerja ke-n sebelum `tgl` — batas paling awal pengajuan sakit (3 hari kerja). */
+export function hariKerjaMundur(tgl: string, n: number, k: Kalender) {
+  let t = tgl
+  for (let i = 0; n > 0 && i < 31; i++) if (hariKerja((t = tambahHari(t, -1)), k)) n--
+  return t
 }

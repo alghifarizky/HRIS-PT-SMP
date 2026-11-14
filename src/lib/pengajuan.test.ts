@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cekLembur, durasiJam, rentangTanggal, teksDurasi } from './pengajuan'
+import { cekLembur, durasiJam, hariKerjaKe, hariKerjaMundur, rentangTanggal, ringkasCuti, teksDurasi } from './pengajuan'
 
 describe('pengajuan', () => {
   it('durasi jam lembur', () => {
@@ -28,5 +28,18 @@ describe('pengajuan', () => {
     const libur = { ...dasar, tanggal: '2026-11-22', hariIni: '2026-11-22', mulai: '08:00', selesai: '12:00', jamPulang: null }
     expect(cekLembur({ ...libur, jamSekarang: '07:59' }).galat).toEqual({})
     expect(cekLembur({ ...libur, jamSekarang: '08:01' }).galat.tanggal).toMatch(/sebelum jam mulai/)
+  })
+  const kal = { hariKerja: new Set([1, 2, 3, 4, 5, 6]), libur: new Map([['2026-12-25', 'Natal']]) }
+  it('ringkas cuti (desain B1 hal 29–30)', () => {
+    expect(ringkasCuti('2026-12-24', '2026-12-29', kal)).toEqual({ jumlah: 4, tidakDihitung: ['Jum 25 Des (Natal)', 'Min 27 Des'] })
+    expect(ringkasCuti('2026-12-07', '2026-12-19', kal).jumlah).toBe(12)
+  })
+  it('batas selesai sesuai saldo', () => {
+    expect(hariKerjaKe('2026-12-07', 8, kal)).toBe('2026-12-15')
+    expect(hariKerjaKe('2026-12-07', 0, kal)).toBeNull()
+  })
+  it('sakit mundur 3 hari kerja (cermin SQL)', () => {
+    expect(hariKerjaMundur('2026-11-12', 3, kal)).toBe('2026-11-09')
+    expect(hariKerjaMundur('2026-11-16', 3, kal)).toBe('2026-11-12') // Minggu dilewati
   })
 })
