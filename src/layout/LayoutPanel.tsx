@@ -6,17 +6,20 @@ import { supabase } from '../lib/supabase'
 import { NAMA_APLIKASI } from '../lib/aplikasi'
 import { useProfil } from '../auth/sesi'
 import { AKSES, LABEL_PERAN, NAV_PANEL, NAV_PANEL_BAWAH, NAV_PANEL_MOBILE_DIREKSI, type ItemNav } from '../navigasi'
-import { BottomNav, judulMobile, TombolNotifikasi, TopBarMobile } from './bagian'
+import { BottomNav, judulMobile, Lencana, LoncengPanel, TopBarMobile } from './bagian'
+import { useJumlahMenungguSaya, useRealtimeNotifikasi } from '../halaman/notifikasi/data'
 
 const kelasMenu = ({ isActive }: { isActive: boolean }) =>
   `fokus-ring flex h-11 items-center gap-3 rounded-kontrol px-3 text-[15px] ${isActive ? 'bg-primer-50 font-semibold text-primer' : 'text-teks hover:bg-latar'}`
 
-function ItemMenu({ item }: { item: ItemNav }) {
+function ItemMenu({ item, jumlah }: { item: ItemNav; jumlah?: number }) {
   const Ikon = item.ikon
   return (
     <NavLink to={item.ke} end={item.ke === '/panel'} className={kelasMenu}>
       <Ikon className="size-5" aria-hidden />
-      {item.label}
+      <span className="flex-1">{item.label}</span>
+      {/* B3B hal 1: angka di menu Persetujuan */}
+      {!!jumlah && <span className="relative size-5"><Lencana n={jumlah} /><span className="sr-only"> menunggu</span></span>}
     </NavLink>
   )
 }
@@ -24,6 +27,8 @@ function ItemMenu({ item }: { item: ItemNav }) {
 export default function LayoutPanel() {
   const profil = useProfil().data!
   const { pathname } = useLocation()
+  useRealtimeNotifikasi()
+  const menunggu = useJumlahMenungguSaya().data
   const judul = Object.entries(AKSES).find(([ke]) => matchPath(ke, pathname))?.[1].label ?? ''
   const hr = profil.role === 'hr'
   const inisial = profil.nama.split(' ').slice(0, 2).map((k) => k[0]).join('').toUpperCase()
@@ -40,7 +45,7 @@ export default function LayoutPanel() {
         </div>
         <nav aria-label="Menu panel" className="mt-2 flex flex-col gap-1 px-3">
           {(NAV_PANEL[profil.role] ?? []).map((i) => (
-            <ItemMenu key={i.ke} item={i} />
+            <ItemMenu key={i.ke} item={i} jumlah={i.ke === '/panel/persetujuan' ? menunggu : undefined} />
           ))}
           <hr className="mx-2 my-3 border-garis" />
           {hr && (
@@ -65,7 +70,7 @@ export default function LayoutPanel() {
           <p className="text-[22px] leading-7 font-semibold">{judul}</p>
           <div className="flex items-center gap-4">
             <CariKaryawan />
-            <TombolNotifikasi ke="/panel/notifikasi" />
+            <LoncengPanel />
             <div className="flex items-center gap-3">
               <span className="flex size-10 items-center justify-center rounded-full bg-primer-100 text-sm font-semibold text-primer" aria-hidden>
                 {inisial}
@@ -94,7 +99,7 @@ export default function LayoutPanel() {
               <Outlet />
             </main>
             <div className="lg:hidden">
-              <BottomNav items={NAV_PANEL_MOBILE_DIREKSI} />
+              <BottomNav items={NAV_PANEL_MOBILE_DIREKSI} lencana={{ '/panel/persetujuan': menunggu }} />
             </div>
           </>
         )}

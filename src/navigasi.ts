@@ -56,6 +56,7 @@ export const KEMBALI_MOBILE: Record<string, (p: Record<string, string | undefine
   '/pengajuan/lembur/ajukan': () => '/pengajuan',
   '/pengajuan/cuti/ajukan': () => '/pengajuan?tab=cuti',
   '/pengajuan/:jenis/:id': (p) => (p.jenis === 'cuti' ? '/pengajuan?tab=cuti' : '/pengajuan'),
+  '/notifikasi': () => '/beranda',
   '/persetujuan/:jenis/:id': (p) => (p.jenis === 'cuti' ? '/persetujuan?tab=cuti' : '/persetujuan'),
 }
 

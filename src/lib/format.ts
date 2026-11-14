@@ -46,5 +46,8 @@ export const inisial = (nama: string) => nama.split(' ').slice(0, 2).map((k) => 
 /** "Kam, 12 Nov 2026" */
 export const tanggalSingkat = (d: Date) => fmtTglSingkat.format(d)
 
+/** "Sen, 9 Nov · 09:05" (WIB, tanpa tahun) */
+export const waktuPendek = (d: Date) => `${fmtTglSingkat.format(d).replace(/ \d{4}$/, '')} · ${fmtJamMenit.format(d).replace('.', ':')}`
+
 /** "Kam, 12 Nov 2026 · 06:51" (WIB) */
 export const waktuSingkat = (d: Date) => `${fmtTglSingkat.format(d)} · ${fmtJamMenit.format(d).replace('.', ':')}`

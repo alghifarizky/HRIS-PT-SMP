@@ -4,7 +4,7 @@ import { useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
 import { useProfil } from '../../auth/sesi'
 import { LABEL_PERAN } from '../../navigasi'
-import { dariTanggalDb, hariIniDb, inisial, tanggalPanjang, tanggalSingkat } from '../../lib/format'
+import { dariTanggalDb, hariIniDb, inisial, tanggalPanjang, tanggalSingkat, waktuPendek } from '../../lib/format'
 import { jamWib } from '../../lib/absensi'
 import { durasiJam, LABEL_JENIS_CUTI, rentangTanggal, ringkasCuti } from '../../lib/pengajuan'
 import { Badge, KeadaanGalat, KeadaanKosong, Skeleton } from '../../komponen/keadaan'
@@ -23,7 +23,7 @@ function lamaMenunggu(iso: string) {
   const hari = Math.round((dariTanggalDb(hariIniDb()).getTime() - dariTanggalDb(tglWib(iso)).getTime()) / 864e5)
   return hari <= 0 ? `hari ini, ${jamMenit(iso)}` : `${hari} hari`
 }
-const pendek = (iso: string) => `${tanggalSingkat(new Date(iso)).replace(/ \d{4}$/, '')} · ${jamMenit(iso)}`
+const pendek = (iso: string) => waktuPendek(new Date(iso))
 
 export default function PersetujuanPanel() {
   const direksi = useProfil().data!.role === 'direksi'
