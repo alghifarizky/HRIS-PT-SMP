@@ -35,8 +35,9 @@ const tambahHari = (tgl: string, n: number) => {
 export const hariIso = (tgl: string) => ((new Date(`${tgl}T00:00:00Z`).getUTCDay() + 6) % 7) + 1
 
 /**
- * Daftar riwayat satu bulan (terbaru di atas): semua hari yang punya absensi + hari kerja yang sudah lewat
- * tanpa absensi ("Tanpa absensi", keputusan Al 14 Nov 2026), mulai tanggal masuk. Hari kerja = Sen–Sab yang
+ * Daftar riwayat satu bulan (terbaru di atas): SEMUA hari yang punya absensi + hari kerja yang sudah lewat
+ * tanpa absensi ("Tanpa absensi", keputusan Al 14 Nov 2026) — yang terakhir hanya sejak tanggal masuk
+ * (bug 14 Nov 2026: batas tanggal masuk dulu ikut menyembunyikan hari yang ada absensinya). Hari kerja = Sen–Sab yang
  * ada di jadwal & bukan hari libur. Hari ini tanpa absensi tidak ditampilkan (masih bisa clock in).
  * Hari hadir = hari kerja yang punya absensi (PRD §6; lembur hari libur tidak dihitung).
  */
@@ -50,14 +51,15 @@ export function susunRiwayat<A extends AbsensiRingkas>(p: {
 }) {
   const perTanggal = new Map(p.absensi.map((a) => [a.tanggal, a]))
   const akhirBulan = tambahHari(`${tambahHari(`${p.bulan}-28`, 4).slice(0, 7)}-01`, -1)
-  const mulai = p.tanggalMasuk && p.tanggalMasuk > `${p.bulan}-01` ? p.tanggalMasuk : `${p.bulan}-01`
+  const mulai = `${p.bulan}-01`
   const akhir = p.hariIni < akhirBulan ? p.hariIni : akhirBulan
+  const sudahBekerja = (t: string) => !p.tanggalMasuk || t >= p.tanggalMasuk
   const adalahHariKerja = (t: string) => p.hariKerja.has(hariIso(t)) && !p.libur.has(t)
 
   const baris: BarisRiwayat<A>[] = []
   for (let t = akhir; t >= mulai; t = tambahHari(t, -1)) {
     const a = perTanggal.get(t) ?? null
-    if (a || (adalahHariKerja(t) && t < p.hariIni)) baris.push({ tanggal: t, absensi: a })
+    if (a || (adalahHariKerja(t) && t < p.hariIni && sudahBekerja(t))) baris.push({ tanggal: t, absensi: a })
   }
   return {
     baris,

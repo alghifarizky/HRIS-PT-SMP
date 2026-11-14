@@ -27,8 +27,10 @@ describe('susunRiwayat', () => {
   it('ringkasan', () => expect([r.hadir, r.terlambat, r.autoClockOut]).toEqual([3, 1, 1]))
   it('hari ini tanpa absensi tidak ditampilkan', () =>
     expect(susunRiwayat({ ...dasar, absensi: [] }).baris[0].tanggal).toBe('2026-11-11'))
-  it('mulai dari tanggal masuk', () =>
+  it('"Tanpa absensi" hanya sejak tanggal masuk', () =>
     expect(susunRiwayat({ ...dasar, tanggalMasuk: '2026-11-11', absensi: [] }).baris.map((b) => b.tanggal)).toEqual(['2026-11-11']))
+  it('absensi tetap tampil walau tanggal masuk diisi setelahnya (bug 14 Nov)', () =>
+    expect(susunRiwayat({ ...dasar, tanggalMasuk: '2026-11-16', absensi: [a('2026-11-12'), a('2026-11-11')] }).baris.map((b) => b.tanggal)).toEqual(['2026-11-12', '2026-11-11']))
   it('bulan lalu penuh sampai akhir bulan', () =>
     expect(susunRiwayat({ ...dasar, bulan: '2026-10', absensi: [] }).baris[0].tanggal).toBe('2026-10-31'))
   it('hariIso', () => expect([hariIso('2026-11-09'), hariIso('2026-11-15')]).toEqual([1, 7]))
