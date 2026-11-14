@@ -69,8 +69,11 @@ export default function DetailPersetujuan() {
           {lembur ? (
             <>
               <Baris label="Tanggal">
-                {tanggalPanjang(dariTanggalDb(lembur.tanggal))}{' '}
-                {lembur.tanggal === hariIniDb() ? <Tanda>Hari ini</Tanda> : lembur.hari_libur && <Tanda>Hari libur</Tanda>}
+                {tanggalPanjang(dariTanggalDb(lembur.tanggal))}
+                {/* badge di baris sendiri agar tidak terpotong di layar sempit */}
+                {(lembur.tanggal === hariIniDb() || lembur.hari_libur) && (
+                  <span className="mt-1 block"><Tanda>{lembur.tanggal === hariIniDb() ? 'Hari ini' : 'Hari libur'}</Tanda></span>
+                )}
               </Baris>
               <Baris label="Jam">{lembur.jam_mulai.slice(0, 5)} – {lembur.jam_selesai.slice(0, 5)} WIB</Baris>
               <Baris label="Durasi">{teksDurasi(menitDari(lembur.jam_selesai) - menitDari(lembur.jam_mulai))}</Baris>
@@ -196,5 +199,5 @@ function LembarKeputusan({ jenis, id, putusan, judul, ringkas, labelJenis, onTut
 }
 
 function Tanda({ children }: { children: ReactNode }) {
-  return <span className="ml-1 rounded-full bg-peringatan-latar px-2.5 py-0.5 text-[13px] font-semibold text-peringatan">{children}</span>
+  return <span className="inline-block rounded-full bg-peringatan-latar px-2.5 py-0.5 text-[13px] font-semibold text-peringatan">{children}</span>
 }
