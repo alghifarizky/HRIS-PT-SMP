@@ -18,8 +18,10 @@ const inisial = (nama: string) => nama.split(' ').slice(0, 2).map((k) => k[0]).j
 export default function AbsensiTim() {
   const hariIni = hariIniDb()
   const [params, setParams] = useSearchParams()
-  const tanggal = params.get('tanggal') ?? hariIni
-  const pilih = (t: string) => setParams(t === hariIni ? {} : { tanggal: t }, { replace: true })
+  // Tanggal masa depan dijepit ke hari ini di aplikasi — Safari iOS mengabaikan atribut max pada input date
+  const jepit = (t: string) => (t > hariIni ? hariIni : t)
+  const tanggal = jepit(params.get('tanggal') ?? hariIni)
+  const pilih = (t: string) => setParams(jepit(t) === hariIni ? {} : { tanggal: jepit(t) }, { replace: true })
   const anggota = useAnggotaTim()
   const hari = useAbsensiTim(tanggal)
 
