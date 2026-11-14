@@ -4,11 +4,14 @@ import { useProfil } from '../auth/sesi'
 import { NAV_MOBILE } from '../navigasi'
 import { BottomNav, judulMobile, kembaliMobile, TopBarMobile } from './bagian'
 
+const LATAR_PUTIH = ['/pengajuan/lembur/ajukan', '/pengajuan/cuti/ajukan']
+
 export default function LayoutMobile() {
   const { role } = useProfil().data!
   const { pathname } = useLocation()
   return (
-    <div className="min-h-dvh bg-latar">
+    // Form pengajuan berlatar putih (desain B1 hal 28–30, 36; revisi Al 14 Nov 2026)
+    <div className={`min-h-dvh ${LATAR_PUTIH.includes(pathname) ? 'bg-permukaan' : 'bg-latar'}`}>
       <TopBarMobile
         ke="/notifikasi"
         judul={judulMobile(pathname)}
