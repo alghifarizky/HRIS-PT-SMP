@@ -3,7 +3,8 @@ import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { Tombol } from './form'
 
-export default function Laci({ judul, subjudul, onTutup, children }: { judul: string; subjudul?: string; onTutup: () => void; children: ReactNode }) {
+/** `kaki`: isi bilah bawah pengganti tombol Tutup (mis. Tolak / Setujui di persetujuan, B3B hal 2). */
+export default function Laci({ judul, subjudul, onTutup, kaki, children }: { judul: string; subjudul?: string; onTutup: () => void; kaki?: ReactNode; children: ReactNode }) {
   const ref = useRef<HTMLDialogElement>(null)
   const idJudul = useId()
   useEffect(() => {
@@ -29,8 +30,8 @@ export default function Laci({ judul, subjudul, onTutup, children }: { judul: st
           </button>
         </div>
         <div className="flex-1 overflow-y-auto px-6 py-5">{children}</div>
-        <div className="flex justify-end border-t border-garis px-6 py-4">
-          <Tombol varian="sekunder" onClick={() => ref.current?.close()}>Tutup</Tombol>
+        <div className="flex justify-end gap-3 border-t border-garis px-6 py-4">
+          {kaki ?? <Tombol varian="sekunder" onClick={() => ref.current?.close()}>Tutup</Tombol>}
         </div>
       </div>
     </dialog>

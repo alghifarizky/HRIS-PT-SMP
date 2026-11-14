@@ -103,6 +103,7 @@ export function usePutuskan(jenis: JenisPengajuan, id: string) {
     },
     onSettled: () => Promise.all([
       qc.invalidateQueries({ queryKey: ['persetujuan_tim'] }),
+      qc.invalidateQueries({ queryKey: ['persetujuan_panel'] }),
       qc.invalidateQueries({ queryKey: ['pengajuan', jenis, 'detail', id] }),
     ]),
   })

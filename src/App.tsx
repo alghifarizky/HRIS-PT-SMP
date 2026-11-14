@@ -34,6 +34,7 @@ const HALAMAN: Record<string, ComponentType> = {
   '/pengajuan/cuti/ajukan': lazy(() => import('./halaman/pengajuan/AjukanCuti')),
   '/persetujuan': lazy(() => import('./halaman/persetujuan/DaftarPersetujuan')),
   '/persetujuan/:jenis/:id': lazy(() => import('./halaman/persetujuan/DetailPersetujuan')),
+  '/panel/persetujuan': lazy(() => import('./halaman/persetujuan/PersetujuanPanel')),
 }
 
 // Route guard hanya untuk UX — keamanan sebenarnya di RLS.

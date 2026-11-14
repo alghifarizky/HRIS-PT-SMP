@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { dariTanggalDb, hariIniDb, inisial, tanggalSingkat, waktuSingkat } from '../../lib/format'
-import { durasiJam, LABEL_JENIS_CUTI, rentangTanggal } from '../../lib/pengajuan'
+import { durasiJam, LABEL_JENIS_CUTI, LABEL_STATUS, NADA_STATUS, rentangTanggal } from '../../lib/pengajuan'
 import { Badge, KeadaanGalat, KeadaanKosong, Skeleton } from '../../komponen/keadaan'
 import type { Cuti, JenisPengajuan, Lembur } from '../pengajuan/data'
 import { usePersetujuanTim, type Item, type Keputusan } from './data'
@@ -74,16 +74,16 @@ function Riwayat({ jenis, isi }: { jenis: JenisPengajuan; isi: Item<(Lembur | Cu
   if (!isi.length) return <Kosong judul="Belum ada riwayat keputusan" pesan="Pengajuan yang sudah Anda setujui atau tolak akan muncul di sini." />
   return (
     <>
-      <p className="-mb-1 text-sm text-teks-sekunder">Keputusan Anda dan status akhir pengajuan</p>
+      <p className="-mb-1 text-sm text-teks-sekunder">Status pengajuan saat ini dan keputusan Anda</p>
       <ul className="flex flex-col gap-3">
         {isi.map((x) => (
           <Kartu key={x.id} jenis={jenis} x={x}
-            kanan={x.keputusan === 'disetujui' ? <Badge nada="sukses">Disetujui</Badge> : <Badge nada="bahaya">Ditolak</Badge>}
-            bawah={<span>Status akhir: {
-              x.keputusan === 'ditolak' ? 'ditolak'
-              : x.status === 'menunggu' ? 'menunggu HR'
-              : x.status === 'dibatalkan' ? 'dibatalkan pengaju'
-              : `${x.status} HR`}</span>} />
+            // Badge = status pengajuan saat ini (revisi Al 14 Nov 2026): setelah Atasan setuju tetap "Menunggu persetujuan HR"
+            // sampai HR memutuskan; keputusan Atasan sendiri di baris bawah.
+            kanan={x.status === 'menunggu' ? <Badge nada="peringatan">Menunggu persetujuan HR</Badge>
+              : x.status === 'dibatalkan' ? <Badge nada="netral">Dibatalkan pengaju</Badge>
+              : <Badge nada={NADA_STATUS[x.status]}>{x.keputusan === 'ditolak' ? 'Ditolak' : `${LABEL_STATUS[x.status]} HR`}</Badge>}
+            bawah={<span>Keputusan Anda: {x.keputusan === 'disetujui' ? 'disetujui' : 'ditolak'}</span>} />
         ))}
       </ul>
     </>
