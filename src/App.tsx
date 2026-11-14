@@ -17,6 +17,7 @@ const HALAMAN: Record<string, ComponentType> = {
   '/panel/karyawan/:id/edit': lazy(() => import('./halaman/karyawan/EditKaryawan')),
   '/panel/karyawan/:id': lazy(() => import('./halaman/karyawan/DetailKaryawan')),
   '/panel/log-audit': lazy(() => import('./halaman/log-audit/LogAudit')),
+  '/panel/absensi': lazy(() => import('./halaman/absensi/RekapAbsensi')),
   '/profil': lazy(() => import('./halaman/profil/ProfilSaya')),
   '/panel/profil': lazy(() => import('./halaman/profil/ProfilSaya')),
   '/ganti-password': lazy(() => import('./halaman/profil/GantiPassword')),

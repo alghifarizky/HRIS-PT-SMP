@@ -102,3 +102,23 @@ export function susunHariTim<A extends Anggota, B extends { pengguna_id: string;
     belum: baris.filter((b) => b.status !== 'hadir').length,
   }
 }
+
+/**
+ * Rekap absensi HR (ATT-09, B3A hal 21): baris per tanggal × karyawan (terbaru dulu) untuk rentang [dari, sampai].
+ * Hari kerja: semua karyawan yang terhitung (lihat susunHariTim). Hari libur: hanya yang punya absensi.
+ */
+export function susunRekap<A extends Anggota, B extends { pengguna_id: string; tanggal: string; terlambat: boolean }>(p: {
+  karyawan: A[]
+  absensi: B[]
+  dari: string
+  sampai: string
+  hariIni: string
+  hariKerja: (tanggal: string) => boolean
+}) {
+  const baris: { tanggal: string; karyawan: A; absensi: B | null; status: StatusTim }[] = []
+  for (let t = p.sampai; t >= p.dari; t = tambahHari(t, -1)) {
+    const hari = susunHariTim({ anggota: p.karyawan, absensi: p.absensi.filter((a) => a.tanggal === t), tanggal: t, hariIni: p.hariIni })
+    for (const b of hari.baris) if (b.absensi || p.hariKerja(t)) baris.push({ tanggal: t, karyawan: b.anggota, absensi: b.absensi, status: b.status })
+  }
+  return baris
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { durasi, hariIso, jamWib, menitLebihCepat, menitTerlambat, susunHariTim, susunRiwayat } from './absensi'
+import { durasi, hariIso, jamWib, menitLebihCepat, menitTerlambat, susunHariTim, susunRekap, susunRiwayat } from './absensi'
 
 const wib = (s: string) => new Date(`${s}+07:00`)
 
@@ -58,4 +58,24 @@ describe('susunHariTim', () => {
     expect(r.baris.map((b) => `${b.anggota.id}:${b.status}`)).toContain('resign:tanpa_absensi')
     expect(r.jumlah).toBe(5)
   })
+})
+
+describe('susunRekap', () => {
+  const k = (id: string) => ({ id, tanggal_masuk: '2020-01-01', aktif: true, tanggal_nonaktif: null })
+  const r = susunRekap({
+    karyawan: [k('rina'), k('budi')],
+    absensi: [{ pengguna_id: 'rina', tanggal: '2026-11-12', terlambat: false }, { pengguna_id: 'budi', tanggal: '2026-11-15', terlambat: false }],
+    dari: '2026-11-11',
+    sampai: '2026-11-15',
+    hariIni: '2026-11-15',
+    hariKerja: (t) => !['2026-11-15'].includes(t), // Minggu
+  })
+  it('hari kerja semua karyawan, hari libur hanya yang punya absensi, terbaru dulu', () =>
+    expect(r.map((b) => `${b.tanggal.slice(8)}:${b.karyawan.id}:${b.status}`)).toEqual([
+      '15:budi:hadir',
+      '14:rina:tanpa_absensi', '14:budi:tanpa_absensi',
+      '13:rina:tanpa_absensi', '13:budi:tanpa_absensi',
+      '12:rina:hadir', '12:budi:tanpa_absensi',
+      '11:rina:tanpa_absensi', '11:budi:tanpa_absensi',
+    ]))
 })
