@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { HEADER_ALASAN, kodeAlasan } from '../../lib/alasan'
 import { durasi, hariIso, jamWib, susunRekap, type StatusTim } from '../../lib/absensi'
 import { jamValid, rapikanJam } from '../../lib/jadwal'
 import { dariTanggalDb, hariIniDb, tanggalPanjang } from '../../lib/format'
@@ -256,7 +257,8 @@ function LaciKoreksi({ b, jadwal, onTutup }: { b: Baris & { absensi: Absen }; ja
     setMenyimpan(true)
     const ringkas = [masuk !== hhmm(a.jam_masuk) && `Jam masuk ${hhmm(a.jam_masuk)} → ${masuk}`, keluar !== hhmm(a.jam_keluar) && `Jam keluar ${hhmm(a.jam_keluar) || '—'} → ${keluar}`].filter(Boolean).join(', ')
     const g = await simpan(
-      () => supabase.from('absensi').update({ jam_masuk: keIso(b.tanggal, masuk), jam_keluar: keluar ? keIso(b.tanggal, keluar) : null, alasan_koreksi: alasan.trim() }).eq('id', a.id),
+      // header x-alasan: alasan koreksi ini tercatat di log audit walau teksnya sama dengan sebelumnya
+      () => supabase.from('absensi').update({ jam_masuk: keIso(b.tanggal, masuk), jam_keluar: keluar ? keIso(b.tanggal, keluar) : null, alasan_koreksi: alasan.trim() }).eq('id', a.id).setHeader(HEADER_ALASAN, kodeAlasan(alasan)),
       `Koreksi absensi ${b.karyawan.nama} disimpan. ${ringkas} · tercatat di Log audit.`,
     )
     setMenyimpan(false)
@@ -346,7 +348,7 @@ function LaciTambah({ awal, karyawan, jadwal, hariIni, onTutup }: {
     if (!alasan.trim()) return setGalat('Alasan koreksi wajib diisi agar tercatat di Log audit.')
     setMenyimpan(true)
     const g = await simpan(
-      () => supabase.from('absensi').insert({ pengguna_id: karyawanId, tanggal, jam_masuk: keIso(tanggal, masuk), jam_keluar: keIso(tanggal, keluar), alasan_koreksi: alasan.trim() }),
+      () => supabase.from('absensi').insert({ pengguna_id: karyawanId, tanggal, jam_masuk: keIso(tanggal, masuk), jam_keluar: keIso(tanggal, keluar), alasan_koreksi: alasan.trim() }).setHeader(HEADER_ALASAN, kodeAlasan(alasan)),
       `Absensi manual ${k?.nama ?? ''} ${tanggalPanjang(dariTanggalDb(tanggal))} disimpan · tercatat di Log audit.`,
     )
     setMenyimpan(false)

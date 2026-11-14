@@ -1,6 +1,6 @@
 -- Uji ringkasan koreksi absensi untuk karyawan (Semula, dikoreksi oleh/pada). Jalankan: npx supabase test db
 begin;
-select plan(7);
+select plan(10);
 alter table public.pengguna alter column tanggal_masuk set default '2020-01-01';
 
 insert into auth.users (id, email) values
@@ -30,12 +30,22 @@ select lives_ok($$ update public.absensi set jam_masuk_semula = '2026-11-05 09:0
   'Update berisi kolom semula diterima, tetapi nilai semula dikembalikan trigger (diuji berikutnya)');
 reset role;
 select is((select jam_masuk_semula from public.absensi), '2026-11-05 07:21+07'::timestamptz, 'Kolom semula tidak bisa ditimpa client');
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000a1","role":"authenticated"}', true);
+select lives_ok($$ update public.absensi set jam_keluar = '2026-11-05 15:10+07', alasan_koreksi = 'Mencoba menimpa semula' $$,
+  'Koreksi dengan alasan sama seperti sebelumnya diterima (perbaikan 14 Nov)');
+select set_config('request.headers', '{"x-alasan":"VWppIG90b21hdGlz"}', true);
+select lives_ok($$ update public.absensi set jam_keluar = '2026-11-05 15:20+07' $$, 'Alasan dari header x-alasan');
+select set_config('request.headers', '', true);
+reset role;
+select results_eq($$ select alasan_koreksi, (select alasan from public.log_audit where tabel = 'absensi' and nilai_baru ->> 'jam_keluar' like '%08:20:00%') from public.absensi $$,
+  $$ values ('Uji otomatis', 'Uji otomatis') $$, 'Alasan header tersimpan di absensi & log audit');
 
 -- Karyawan pemilik membaca ringkasan koreksinya
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000c1","role":"authenticated"}', true);
 select results_eq($$ select jam_masuk_semula, dikoreksi_oleh_nama, alasan_koreksi from public.absensi $$,
-  $$ values ('2026-11-05 07:21+07'::timestamptz, 'Dewi Lestari (HR)', 'Mencoba menimpa semula') $$, 'Karyawan melihat semula, nama HR & alasan');
+  $$ values ('2026-11-05 07:21+07'::timestamptz, 'Dewi Lestari (HR)', 'Uji otomatis') $$, 'Karyawan melihat semula, nama HR & alasan');
 select is((select count(*)::int from public.log_audit), 0, 'Karyawan tetap tidak membaca log audit');
 reset role;
 
