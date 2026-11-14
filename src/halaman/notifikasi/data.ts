@@ -7,7 +7,7 @@ import { useProfil } from '../../auth/sesi'
 import type { Peran } from '../../auth/sesi'
 import { TABEL, type JenisPengajuan } from '../pengajuan/data'
 
-export type Notifikasi = { id: string; judul: string; pesan: string; jenis_objek: JenisPengajuan | null; objek_id: string | null; dibaca: boolean; dibuat_pada: string }
+export type Notifikasi = { id: string; judul: string; pesan: string; jenis_objek: JenisPengajuan | 'absensi' | null; objek_id: string | null; dibaca: boolean; dibuat_pada: string }
 
 export function useNotifikasi() {
   const id = useProfil().data!.id
@@ -71,9 +71,15 @@ export function useTandaiDibaca() {
   })
 }
 
-/** Halaman tujuan saat notifikasi diketuk: pengaju → detail pengajuan; penyetuju → layar persetujuan sesuai peran. */
+/** Halaman tujuan saat notifikasi diketuk: absensi → detail absensi; pengaju → detail pengajuan; penyetuju → layar
+ *  persetujuan sesuai peran. */
 export async function tujuanNotifikasi(n: Notifikasi, saya: { id: string; role: Peran }) {
   if (!n.jenis_objek || !n.objek_id) return null
+  if (n.jenis_objek === 'absensi') {
+    // Auto clock out / koreksi HR — selalu absensi milik pembaca
+    const { data } = await supabase.from('absensi').select('tanggal').eq('id', n.objek_id).maybeSingle()
+    return data ? `/absensi/${(data as { tanggal: string }).tanggal}` : null
+  }
   const { data } = await supabase.from(TABEL[n.jenis_objek]).select('pengguna_id').eq('id', n.objek_id).maybeSingle()
   if (!data) return null
   if ((data as { pengguna_id: string }).pengguna_id === saya.id) return `/pengajuan/${n.jenis_objek}/${n.objek_id}`
