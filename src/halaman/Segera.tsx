@@ -5,8 +5,9 @@ import { Hammer } from 'lucide-react'
 export default function Segera({ judul, children }: { judul: string; children?: ReactNode }) {
   return (
     <div>
-      <h1 className="text-[22px] leading-7 font-semibold">{judul}</h1>
-      <div className="mt-6 flex flex-col items-center rounded-kartu border border-garis bg-permukaan px-6 py-10 text-center">
+      {/* judul sudah tampil di top bar (mobile) / header panel — di sini hanya untuk pembaca layar */}
+      <h1 className="sr-only">{judul}</h1>
+      <div className="flex flex-col items-center rounded-kartu border border-garis bg-permukaan px-6 py-10 text-center">
         <div className="flex size-12 items-center justify-center rounded-full bg-latar">
           <Hammer className="size-6 text-teks-sekunder" aria-hidden />
         </div>
