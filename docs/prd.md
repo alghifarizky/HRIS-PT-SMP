@@ -272,6 +272,7 @@ Nilai gaji pokok & tarif disalin ke slip saat payroll dibuat.
 | Hosting | Vercel |
 | Karyawan resign | Akun dinonaktifkan, tidak bisa login; data tetap tersimpan |
 | Saldo cuti | Reset 1 Januari, sisa hangus, karyawan baru proporsional |
+| Koreksi tanggal masuk | Saldo cuti otomatis ± selisih jatah proporsional (tanggal baru − lama); cuti terpakai tetap terhitung, saldo tidak minus (keputusan Al, 14 Nov 2026) |
 | Cuti bersama | Memotong saldo cuti (saldo tidak minus) |
 | Region Supabase | Singapore (ap-southeast-1) |
 | Koreksi absensi HR | Masuk MVP |

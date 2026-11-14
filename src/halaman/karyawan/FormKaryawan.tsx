@@ -210,6 +210,11 @@ export default function FormKaryawan({ awal }: { awal?: DataKaryawan }) {
   const isianSalah = (Object.keys(errors) as (keyof Isian)[]).map((k) => LABEL_ISIAN[k])
   const tahun = tahunIni()
   const saldo = !edit && tanggalMasuk && pengaturan.data ? jatahProporsional(pengaturan.data.jatah_cuti_tahunan, tanggalMasuk, hariIniDb()) : null
+  // Edit: koreksi tanggal masuk menggeser saldo sebesar selisih jatah (cermin trigger sesuaikan_saldo_tanggal_masuk)
+  const saldoBaru = edit && awal.saldo_cuti != null && awal.tanggal_masuk && tanggalMasuk && tanggalMasuk !== awal.tanggal_masuk && pengaturan.data
+    ? Math.max(0, awal.saldo_cuti + jatahProporsional(pengaturan.data.jatah_cuti_tahunan, tanggalMasuk, hariIniDb()).hari
+        - jatahProporsional(pengaturan.data.jatah_cuti_tahunan, awal.tanggal_masuk, hariIniDb()).hari)
+    : null
   const judul = edit ? `Edit karyawan: ${awal.nama}` : 'Tambah karyawan'
 
   return (
@@ -376,7 +381,12 @@ export default function FormKaryawan({ awal }: { awal?: DataKaryawan }) {
               {edit ? (
                 <>
                   <p className="mt-1 text-[15px] text-teks-sekunder">Sisa saldo cuti {tahun}</p>
-                  <p className="mt-2 text-[28px] leading-[34px] font-bold tabular-nums">{awal.saldo_cuti ?? 0} hari</p>
+                  <p className="mt-2 text-[28px] leading-[34px] font-bold tabular-nums">{saldoBaru ?? awal.saldo_cuti ?? 0} hari</p>
+                  {saldoBaru != null && saldoBaru !== awal.saldo_cuti && (
+                    <p className="mt-2 text-sm text-teks-sekunder">
+                      Semula {awal.saldo_cuti} hari. Tanggal masuk dikoreksi → saldo disesuaikan sebesar selisih jatah; cuti yang sudah terpakai tetap terhitung.
+                    </p>
+                  )}
                   {/* shortcut: rincian "terpakai · hangus 31 Des" (desain hal 12) menyusul bersama fitur cuti (Fase 4) */}
                 </>
               ) : saldo ? (
