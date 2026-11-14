@@ -28,6 +28,8 @@ const HALAMAN: Record<string, ComponentType> = {
   '/absensi/tim/:id': lazy(() => import('./halaman/absensi/AnggotaTim').then((m) => ({ default: m.RiwayatAnggota }))),
   '/absensi/tim/:id/profil': lazy(() => import('./halaman/absensi/AnggotaTim').then((m) => ({ default: m.ProfilAnggota }))),
   '/absensi/tim/:id/:tanggal': lazy(() => import('./halaman/absensi/DetailAbsensi')),
+  '/pengajuan': lazy(() => import('./halaman/pengajuan/DaftarPengajuan')),
+  '/pengajuan/:jenis/:id': lazy(() => import('./halaman/pengajuan/DetailPengajuan')),
 }
 
 // Route guard hanya untuk UX — keamanan sebenarnya di RLS.

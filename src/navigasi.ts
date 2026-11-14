@@ -78,6 +78,9 @@ export const AKSES: Record<string, { label: string; peran: Peran[] }> = (() => {
     tambah({ ke: '/ganti-password', label: 'Ganti password' }, r)
     tambah({ ke: '/clock', label: 'Clock' }, r) // layar penuh kamera, di luar shell mobile
     tambah({ ke: '/absensi/:tanggal', label: 'Detail absensi' }, r)
+    tambah({ ke: '/pengajuan/lembur/ajukan', label: 'Ajukan lembur' }, r)
+    tambah({ ke: '/pengajuan/cuti/ajukan', label: 'Ajukan cuti/sakit/izin' }, r)
+    tambah({ ke: '/pengajuan/:jenis/:id', label: 'Detail pengajuan' }, r)
   }
   return akses
 })()

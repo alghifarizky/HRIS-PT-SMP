@@ -1,7 +1,7 @@
 -- Uji pengajuan lembur & cuti/sakit/izin, persetujuan berjenjang, notifikasi (Fase 4.1).
 -- Waktu pengajuan ditentukan lewat fungsi inti catat_ajukan_* (parameter `pada`).
 begin;
-select plan(46);
+select plan(47);
 alter table public.pengguna alter column tanggal_masuk set default '2020-01-01';
 
 insert into auth.users (id, email) values
@@ -117,6 +117,8 @@ select lives_ok($$ select public.putuskan_pengajuan('cuti', (select id from id_u
   'HR menyetujui tingkat 2');
 select is((select count(*)::int from public.persetujuan p join id_uji i on i.id = p.pengajuan_cuti_id where i.nomor = 'CTI-2026-0001'), 2,
   'Riwayat 2 tingkat persetujuan tercatat');
+select is((select string_agg(penyetuju_nama, ',' order by tingkat) from public.persetujuan p join id_uji i on i.id = p.pengajuan_cuti_id where i.nomor = 'CTI-2026-0001'),
+  'Budi,Dewi', 'Nama penyetuju tersimpan');
 
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000c1","role":"authenticated"}', true);
 select is((select status::text from public.pengajuan_cuti where nomor = 'CTI-2026-0001'), 'disetujui', 'Cuti final disetujui');
