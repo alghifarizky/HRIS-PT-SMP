@@ -21,8 +21,8 @@ export default function DaftarPengajuan() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-[22px] leading-7 font-semibold">Pengajuan</h1>
-      <div role="tablist" className="-mx-4 grid grid-cols-2 border-b border-garis">
+      {/* Judul cukup di top bar; tab menempel di bawahnya, putih selebar layar (B1 hal 31, 35) */}
+      <div role="tablist" aria-label="Jenis pengajuan" className="-mx-4 -mt-6 grid grid-cols-2 border-b border-garis bg-permukaan">
         {(['lembur', 'cuti'] as const).map((t) => (
           <button key={t} role="tab" type="button" aria-selected={tab === t} onClick={() => atur({ tab: t })}
             className={`fokus-ring -mb-px h-12 border-b-2 text-[15px] font-semibold ${tab === t ? 'border-primer text-primer' : 'border-transparent text-teks-sekunder'}`}>
