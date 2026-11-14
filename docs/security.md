@@ -134,6 +134,8 @@ RLS bekerja per **baris**, bukan per kolom. Agar Atasan tidak melihat `no_ktp` &
 - Kompres selfie di client sebelum upload.
 - Kolom DB menyimpan **path**, bukan URL publik.
 - **Retensi selfie 12 bulan**: job `pg_cron` bulanan menghapus file selfie berumur > 12 bulan dan mengosongkan kolom path terkait (data jam absensi tetap disimpan).
+  - Implementasi: job `bersihkan-selfie` (18:00 UTC tgl 1 = 01:00 WIB tgl 2) memanggil Edge Function `bersihkan-selfie` lewat `pg_net` dengan kunci acak yang dibangkitkan di database & disimpan di **Vault** (tidak ada di repo). Fungsi mengosongkan path dulu, lalu menghapus file lewat Storage API (hapus lewat SQL tidak menghapus file).
+  - Sekaligus menghapus **foto yatim** (terunggah tapi clock in gagal, tidak dirujuk absensi) berumur > 2 hari.
 
 ## 6. Kunci & konfigurasi
 

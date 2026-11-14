@@ -435,6 +435,12 @@ entrypoint = "./functions/akun/index.ts"
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/akun/*.html" ]
 
+[functions.bersihkan-selfie]
+enabled = true
+verify_jwt = false # diperiksa sendiri lewat header x-kunci-job (kunci di Vault)
+import_map = "./functions/bersihkan-selfie/deno.json"
+entrypoint = "./functions/bersihkan-selfie/index.ts"
+
 # Pengaturan khusus project production (Singapore). Menimpa pengaturan dasar di atas.
 [remotes.production]
 project_id = "weqqkcykyqwexagegstw"
