@@ -1,8 +1,9 @@
-// APR-01–03 — Persetujuan tingkat 2 HR (B3B hal 1 lembur, 2 panel detail lembur, 3 sukses, 4 detail cuti, 5 riwayat,
-// 6 kosong, 7 memuat, 8 galat). Keputusan tingkat 2 = status final. Direksi menyusul (4.4b).
+// APR-01–03 — Persetujuan panel. HR tingkat 2 (B3B hal 1–8) & Direksi untuk pengaju Atasan/HR (B4 hal 2–10 desktop,
+// 47–53 HP: kartu + laci layar penuh). Keputusan HR tingkat 2 / Direksi = status final.
 import { useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
 import { useProfil } from '../../auth/sesi'
+import { LABEL_PERAN } from '../../navigasi'
 import { dariTanggalDb, hariIniDb, inisial, tanggalPanjang, tanggalSingkat } from '../../lib/format'
 import { jamWib } from '../../lib/absensi'
 import { durasiJam, LABEL_JENIS_CUTI, rentangTanggal, ringkasCuti } from '../../lib/pengajuan'
@@ -10,7 +11,6 @@ import { Badge, KeadaanGalat, KeadaanKosong, Skeleton } from '../../komponen/kea
 import { BannerGalat, Tombol } from '../../komponen/form'
 import Laci from '../../komponen/Laci'
 import { useToast } from '../../komponen/toast'
-import Segera from '../Segera'
 import type { Cuti, JenisPengajuan, Lembur } from '../pengajuan/data'
 import { AlurPersetujuan, Lampiran } from '../pengajuan/bagian'
 import { usePutuskan } from './data'
@@ -19,20 +19,14 @@ import { sejak, useKonteksPanel, usePersetujuanPanel, type ItemPanel, type ItemR
 const tglWib = (iso: string) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date(iso))
 const jamMenit = (iso: string) => jamWib(new Date(iso))
 /** "hari ini, 08:05" · "2 hari" */
-function lamaMenunggu(iso: string | null) {
-  if (!iso) return '—'
+function lamaMenunggu(iso: string) {
   const hari = Math.round((dariTanggalDb(hariIniDb()).getTime() - dariTanggalDb(tglWib(iso)).getTime()) / 864e5)
   return hari <= 0 ? `hari ini, ${jamMenit(iso)}` : `${hari} hari`
 }
 const pendek = (iso: string) => `${tanggalSingkat(new Date(iso)).replace(/ \d{4}$/, '')} · ${jamMenit(iso)}`
 
 export default function PersetujuanPanel() {
-  const saya = useProfil().data!
-  if (saya.role !== 'hr') return <Segera judul="Persetujuan" />
-  return <PanelHr />
-}
-
-function PanelHr() {
+  const direksi = useProfil().data!.role === 'direksi'
   const [params, setParams] = useSearchParams()
   const tab: JenisPengajuan = params.get('tab') === 'cuti' ? 'cuti' : 'lembur'
   const riwayat = params.get('mode') === 'riwayat'
@@ -45,8 +39,11 @@ function PanelHr() {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="text-[28px] leading-[34px] font-bold">Persetujuan tingkat 2</h1>
-        <p className="mt-1 text-[15px] text-teks-sekunder">{tanggalPanjang(dariTanggalDb(hariIniDb()))} · pengajuan karyawan yang sudah disetujui atasan</p>
+        <h1 className="hidden text-[28px] leading-[34px] font-bold lg:block">{direksi ? 'Persetujuan Direksi' : 'Persetujuan tingkat 2'}</h1>
+        <p className="mt-1 text-[15px] text-teks-sekunder">
+          <span className="hidden lg:inline">{tanggalPanjang(dariTanggalDb(hariIniDb()))} · </span>
+          {direksi ? 'pengajuan Atasan dan HR · keputusan Anda langsung final' : 'pengajuan karyawan yang sudah disetujui atasan'}
+        </p>
       </div>
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-garis">
         <div role="tablist" aria-label="Jenis pengajuan" className="flex gap-2">
@@ -73,16 +70,38 @@ function PanelHr() {
           : q.isError ? <KeadaanGalat judul="Persetujuan gagal dimuat" onCobaLagi={() => q.refetch()} />
           : !daftar.length ? (riwayat
             ? <KeadaanKosong judul="Belum ada riwayat keputusan" pesan="Pengajuan yang sudah Anda setujui atau tolak akan muncul di sini." />
-            : <KeadaanKosong judul="Tidak ada pengajuan yang menunggu" pesan="Pengajuan karyawan yang sudah disetujui atasan akan muncul di sini." />)
-          : (
-            <div className="overflow-x-auto">
+            : <KeadaanKosong judul="Tidak ada pengajuan yang menunggu" pesan={direksi ? 'Pengajuan lembur & cuti dari Atasan dan HR akan muncul di sini.' : 'Pengajuan karyawan yang sudah disetujui atasan akan muncul di sini.'} />)
+          : (<>
+            {/* HP (Direksi < 1024 px, B4 hal 47): kartu; laci detail tampil layar penuh */}
+            <ul className="divide-y divide-garis lg:hidden">
+              {daftar.map((x) => (
+                <li key={x.id}>
+                  <button type="button" onClick={() => setPilih(x.id)} className="fokus-ring flex w-full gap-3 p-4 text-left hover:bg-latar">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primer-100 text-sm font-semibold text-primer" aria-hidden>{inisial(x.pengguna.nama)}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-start justify-between gap-2">
+                        <span className="min-w-0">
+                          <span className="block truncate font-semibold">{x.pengguna.nama}</span>
+                          <span className="block truncate text-sm text-teks-sekunder">{LABEL_PERAN[x.pengguna.role]} · {x.pengguna.jabatan ?? '—'}</span>
+                        </span>
+                        {riwayat && ((x as ItemRiwayat).keputusan === 'disetujui' ? <Badge nada="sukses">Disetujui</Badge> : <Badge nada="bahaya">Ditolak</Badge>)}
+                      </span>
+                      <span className="mt-2 block"><Jenis jenis={tab} x={x} /></span>
+                      <span className="block text-[15px]"><TanggalDurasi jenis={tab} x={x} /></span>
+                      {!riwayat && <span className="mt-1 block text-sm text-teks-sekunder">Diajukan {pendek(x.diajukan_pada)}</span>}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <div className="hidden overflow-x-auto lg:block">
               <table className="w-full text-left text-[15px]">
                 <thead className="text-[13px] font-semibold tracking-wide text-teks-sekunder uppercase">
                   <tr className="border-b border-garis">
                     <th scope="col" className="px-5 py-3">Pengaju</th>
                     <th scope="col" className="px-5 py-3">Jenis</th>
                     <th scope="col" className="px-5 py-3">Tanggal & durasi</th>
-                    <th scope="col" className="px-5 py-3">Disetujui tingkat 1</th>
+                    <th scope="col" className="px-5 py-3">{direksi ? 'Peran pengaju' : 'Disetujui tingkat 1'}</th>
                     <th scope="col" className="px-5 py-3">{riwayat ? 'Keputusan Anda' : 'Menunggu sejak'}</th>
                   </tr>
                 </thead>
@@ -104,8 +123,10 @@ function PanelHr() {
                         <td className="px-5 py-3"><Jenis jenis={tab} x={x} /></td>
                         <td className="px-5 py-3 whitespace-nowrap"><TanggalDurasi jenis={tab} x={x} /></td>
                         <td className="px-5 py-3 whitespace-nowrap">
-                          <span className="block">{t1?.penyetuju_nama ?? '—'}</span>
-                          {t1 && <span className="block text-[13px] text-teks-sekunder">{pendek(t1.diputuskan_pada)}</span>}
+                          {direksi ? LABEL_PERAN[x.pengguna.role] : <>
+                            <span className="block">{t1?.penyetuju_nama ?? '—'}</span>
+                            {t1 && <span className="block text-[13px] text-teks-sekunder">{pendek(t1.diputuskan_pada)}</span>}
+                          </>}
                         </td>
                         <td className="px-5 py-3 whitespace-nowrap">
                           {riwayat
@@ -118,10 +139,10 @@ function PanelHr() {
                 </tbody>
               </table>
             </div>
-          )}
+          </>)}
       </div>
       <p className="text-sm text-teks-sekunder">
-        {riwayat ? 'Keputusan tingkat 2 adalah status final pengajuan.' : 'Urutan: paling lama menunggu di atas. Klik baris untuk meninjau.'}
+        {riwayat ? `Keputusan ${direksi ? 'Direksi' : 'tingkat 2'} adalah status final pengajuan.` : 'Urutan: paling lama menunggu di atas. Klik baris untuk meninjau.'}
       </p>
 
       {terpilih && <LaciDetail key={terpilih.id} jenis={tab} x={terpilih} bisaPutuskan={!riwayat} onTutup={() => setPilih(null)} />}
@@ -165,7 +186,9 @@ function LaciDetail({ jenis, x, bisaPutuskan, onTutup }: { jenis: JenisPengajuan
   const l = jenis === 'lembur' ? (x as ItemPanel<Lembur>) : null
   const c = jenis === 'cuti' ? (x as ItemPanel<Cuti>) : null
   const label = l ? 'Lembur' : LABEL_JENIS_CUTI[c!.jenis]
-  const giliran = bisaPutuskan && x.status === 'menunggu' && x.tingkat_berikut === 2
+  const direksi = saya.role === 'direksi'
+  const tingkatSaya = direksi ? 1 : 2
+  const giliran = bisaPutuskan && x.status === 'menunggu' && x.tingkat_berikut === tingkatSaya
   const putuskan = (putusan: 'disetujui' | 'ditolak') => m.mutate({ putusan, catatan }, {
     onSuccess: () => {
       toast(`${label} ${x.pengguna.nama} ${putusan}. Status final: ${putusan === 'disetujui' ? 'Disetujui' : 'Ditolak'}.`)
@@ -211,23 +234,23 @@ function LaciDetail({ jenis, x, bisaPutuskan, onTutup }: { jenis: JenisPengajuan
                 {x.status === 'disetujui' ? `${c.pengguna.saldo_cuti} hari` : <span className={c.pengguna.saldo_cuti < c.jumlah_hari ? 'text-bahaya' : ''}>{c.pengguna.saldo_cuti} hari → {c.pengguna.saldo_cuti - c.jumlah_hari} hari</span>}
               </BarisKonteks>
             )}
-            <BarisKonteks label="Bentrok tim">
+            {c.pengguna.atasan_id && <BarisKonteks label="Bentrok tim">
               {k.bentrok.length
                 ? <span className="text-peringatan">{k.bentrok.map((b) => `${b.pengguna.nama} · ${b.jenis} ${rentangTanggal(b.tanggal_mulai, b.tanggal_selesai)} (${b.status})`).join('; ')}</span>
                 : <span className="font-normal text-teks-sekunder">Tidak ada rekan satu tim yang cuti</span>}
-            </BarisKonteks>
+            </BarisKonteks>}
           </dl>
         )}
         {c && <p className="text-teks-sekunder">Lampiran: {c.lampiran_path ? <Lampiran path={c.lampiran_path} /> : 'tidak ada'}</p>}
 
         <AlurPersetujuan p={x} pengaju={{ nama: x.pengguna.nama, role: x.pengguna.role }} batalOleh="Oleh pengaju"
-          saya={{ tingkat: 2, nama: saya.nama, jabatan: saya.jabatan }} />
+          saya={{ tingkat: tingkatSaya, nama: saya.nama, jabatan: saya.jabatan }} />
 
         {giliran && (
           <div>
             {m.isError && <div className="mb-3"><BannerGalat>{m.error.message}</BannerGalat></div>}
-            <label htmlFor="catatan-hr" className="text-sm font-medium">Catatan <span className="font-normal text-teks-sekunder">(opsional)</span></label>
-            <textarea id="catatan-hr" rows={3} maxLength={500} value={catatan} onChange={(e) => setCatatan(e.target.value)}
+            <label htmlFor="catatan-keputusan" className="text-sm font-medium">Catatan <span className="font-normal text-teks-sekunder">(opsional)</span></label>
+            <textarea id="catatan-keputusan" rows={3} maxLength={500} value={catatan} onChange={(e) => setCatatan(e.target.value)}
               placeholder="Catatan untuk pengaju, wajib dibaca bila ditolak"
               className="fokus-ring mt-2 w-full rounded-kontrol border border-garis bg-permukaan px-4 py-3 text-[15px] placeholder:text-teks-3" />
           </div>

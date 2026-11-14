@@ -1,5 +1,6 @@
-// APR-01–03 — Persetujuan di panel: HR tingkat 2 (pengajuan karyawan yang sudah disetujui atasan, B3B hal 1–8).
-// HR membaca tabel pengguna penuh, jadi data pengaju di-embed langsung.
+// APR-01–03 — Persetujuan di panel: HR tingkat 2 (pengajuan karyawan yang sudah disetujui atasan, B3B hal 1–8) dan
+// Direksi (tingkat 1 pengajuan Atasan/HR, langsung final — B4 hal 2–10, 47–53). HR & Direksi membaca tabel pengguna
+// penuh, jadi data pengaju di-embed langsung.
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useProfil } from '../../auth/sesi'
@@ -10,16 +11,19 @@ export type Pengaju = { nama: string; jabatan: string | null; role: Peran; atasa
 export type ItemPanel<T = Lembur | Cuti> = T & { pengguna_id: string; pengguna: Pengaju; persetujuan: Persetujuan[] }
 export type ItemRiwayat<T = Lembur | Cuti> = ItemPanel<T> & { keputusan: 'disetujui' | 'ditolak'; diputuskan_pada: string }
 
-const SUB = (jenis: JenisPengajuan) =>
-  `${KOLOM[jenis]}, pengguna_id, pengguna:pengguna_id(nama, jabatan, role, atasan_id, saldo_cuti), persetujuan(tingkat, keputusan, catatan, diputuskan_pada, penyetuju_nama, penyetuju_jabatan)`
+const SUB = (jenis: JenisPengajuan, inner = false) =>
+  `${KOLOM[jenis]}, pengguna_id, pengguna:pengguna_id${inner ? '!inner' : ''}(nama, jabatan, role, atasan_id, saldo_cuti), persetujuan(tingkat, keputusan, catatan, diputuskan_pada, penyetuju_nama, penyetuju_jabatan)`
 
 export function usePersetujuanPanel() {
-  const saya = useProfil().data!.id
+  const { id: saya, role } = useProfil().data!
+  const direksi = role === 'direksi'
   return useQuery({
     queryKey: ['persetujuan_panel', saya],
     queryFn: async () => {
-      const menunggu = (jenis: JenisPengajuan) =>
-        supabase.from(TABEL[jenis]).select(SUB(jenis)).eq('status', 'menunggu').eq('tingkat_berikut', 2).order('diajukan_pada')
+      const menunggu = (jenis: JenisPengajuan) => direksi
+        ? supabase.from(TABEL[jenis]).select(SUB(jenis, true)).eq('status', 'menunggu').eq('tingkat_berikut', 1)
+            .in('pengguna.role', ['atasan', 'hr']).order('diajukan_pada')
+        : supabase.from(TABEL[jenis]).select(SUB(jenis)).eq('status', 'menunggu').eq('tingkat_berikut', 2).order('diajukan_pada')
       // shortcut: 100 keputusan terakhir tanpa paginasi — tambah paginasi bila riwayat terpotong
       const riwayat = supabase.from('persetujuan')
         .select(`keputusan, diputuskan_pada, pengajuan_lembur(${SUB('lembur')}), pengajuan_cuti(${SUB('cuti')})`)
@@ -28,8 +32,8 @@ export function usePersetujuanPanel() {
       for (const x of [l, c, r]) if (x.error) throw x.error
       type Baris = { keputusan: 'disetujui' | 'ditolak'; diputuskan_pada: string; pengajuan_lembur: ItemPanel<Lembur> | null; pengajuan_cuti: ItemPanel<Cuti> | null }
       const rw = r.data as unknown as Baris[]
-      // Disetujui tingkat 1 paling lama di atas (B3B hal 1: "paling lama menunggu di atas")
-      const urut = <T extends ItemPanel>(xs: T[]) => xs.sort((a, b) => (sejak(a) ?? '').localeCompare(sejak(b) ?? ''))
+      // Paling lama menunggu di atas (B3B hal 1, B4 hal 2)
+      const urut = <T extends ItemPanel>(xs: T[]) => xs.sort((a, b) => sejak(a).localeCompare(sejak(b)))
       return {
         menunggu: { lembur: urut(l.data as unknown as ItemPanel<Lembur>[]), cuti: urut(c.data as unknown as ItemPanel<Cuti>[]) },
         riwayat: {
@@ -41,8 +45,8 @@ export function usePersetujuanPanel() {
   })
 }
 
-/** Waktu keputusan tingkat 1 = mulai menunggu HR. */
-export const sejak = (x: ItemPanel) => x.persetujuan.find((p) => p.tingkat === 1)?.diputuskan_pada ?? null
+/** Mulai menunggu: HR sejak keputusan tingkat 1; Direksi sejak diajukan. */
+export const sejak = (x: ItemPanel) => x.persetujuan.find((p) => p.tingkat === 1)?.diputuskan_pada ?? x.diajukan_pada
 
 /** Konteks cuti: kalender & rekan satu atasan yang cuti/sakit/izin di rentang yang sama. Lembur: jadwal & clock in. */
 export function useKonteksPanel(x: ItemPanel | null, jenis: JenisPengajuan) {
