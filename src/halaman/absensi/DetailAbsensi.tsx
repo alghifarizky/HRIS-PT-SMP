@@ -10,10 +10,11 @@ import { useAbsensiTanggal, useFotoSelfie } from './data'
 import { badgeAbsensi } from './RiwayatAbsensi'
 
 export default function DetailAbsensi() {
-  const tanggal = useParams().tanggal!
-  const q = useAbsensiTanggal(tanggal)
+  const { tanggal, id } = useParams() // id ada = anggota tim (rute /absensi/tim/:id/:tanggal)
+  const q = useAbsensiTanggal(tanggal!, id)
+  const dasar = id ? `/absensi/tim/${id}` : '/absensi'
   const kembali = (
-    <Link to={`/absensi?bulan=${tanggal.slice(0, 7)}`} className="fokus-ring -ml-2 inline-flex min-h-11 items-center gap-1 rounded-kontrol px-2 text-[15px] font-semibold text-primer">
+    <Link to={`${dasar}?bulan=${tanggal!.slice(0, 7)}`} className="fokus-ring -ml-2 inline-flex min-h-11 items-center gap-1 rounded-kontrol px-2 text-[15px] font-semibold text-primer">
       <ChevronLeft className="size-5" aria-hidden /> Riwayat absensi
     </Link>
   )
@@ -32,7 +33,7 @@ export default function DetailAbsensi() {
     <div className="flex flex-col gap-4">
       {kembali}
       <div className="flex items-start justify-between gap-3">
-        <h1 className="text-[22px] leading-7 font-semibold">{tanggalPanjang(dariTanggalDb(tanggal))}</h1>
+        <h1 className="text-[22px] leading-7 font-semibold">{tanggalPanjang(dariTanggalDb(tanggal!))}</h1>
         {badgeAbsensi(a, jadwal?.jam_pulang ?? null)}
       </div>
 

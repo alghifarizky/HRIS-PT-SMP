@@ -5,7 +5,7 @@ import { ChevronRight } from 'lucide-react'
 import { durasi, hariIso, jamWib, menitLebihCepat, susunRiwayat } from '../../lib/absensi'
 import { dariTanggalDb, hariIniDb } from '../../lib/format'
 import { Badge, KeadaanGalat, KeadaanKosong, Skeleton } from '../../komponen/keadaan'
-import { useRiwayatAbsensi, type BarisAbsensi } from './data'
+import { useRiwayatAbsensi, type BarisAbsensi, type TargetAbsensi } from './data'
 
 const fmtBulan = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric', timeZone: 'UTC' })
 const fmtHariPendek = new Intl.DateTimeFormat('id-ID', { weekday: 'short', timeZone: 'Asia/Jakarta' })
@@ -30,9 +30,14 @@ export function badgeAbsensi(a: BarisAbsensi, jamPulang: string | null) {
 }
 
 export default function RiwayatAbsensi() {
+  return <DaftarRiwayat dasar="/absensi" />
+}
+
+/** Riwayat per bulan. `target` = anggota tim (dipakai Atasan); `dasar` = awalan tautan detail harian. */
+export function DaftarRiwayat({ target, dasar }: { target?: TargetAbsensi; dasar: string }) {
   const [params, setParams] = useSearchParams()
   const bulan = params.get('bulan') ?? bulanIni()
-  const q = useRiwayatAbsensi(bulan)
+  const q = useRiwayatAbsensi(bulan, target)
   const pilihan = pilihanBulan()
   const r = q.data && susunRiwayat({ bulan, ...q.data, hariIni: hariIniDb() })
   const jamPulang = (t: string) => (q.data?.libur.has(t) ? null : (q.data?.jamPulang.get(hariIso(t)) ?? null))
@@ -77,7 +82,7 @@ export default function RiwayatAbsensi() {
             <ul className="divide-y divide-garis overflow-hidden rounded-kartu border border-garis bg-permukaan">
               {r!.baris.map(({ tanggal, absensi: a }) => (
                 <li key={tanggal}>
-                  <Baris tanggal={tanggal} a={a} jamPulang={jamPulang(tanggal)} />
+                  <Baris tanggal={tanggal} a={a} jamPulang={jamPulang(tanggal)} dasar={dasar} />
                 </li>
               ))}
             </ul>
@@ -97,7 +102,7 @@ function Angka({ label, nilai, warna }: { label: string; nilai: number; warna?: 
   )
 }
 
-function Baris({ tanggal, a, jamPulang }: { tanggal: string; a: BarisAbsensi | null; jamPulang: string | null }) {
+function Baris({ tanggal, a, jamPulang, dasar }: { tanggal: string; a: BarisAbsensi | null; jamPulang: string | null; dasar: string }) {
   const d = dariTanggalDb(tanggal)
   const isi = (
     <>
@@ -127,7 +132,7 @@ function Baris({ tanggal, a, jamPulang }: { tanggal: string; a: BarisAbsensi | n
     </>
   )
   return a ? (
-    <Link to={`/absensi/${tanggal}`} className="fokus-ring flex min-h-16 items-center gap-4 px-4 py-3 hover:bg-latar">{isi}</Link>
+    <Link to={`${dasar}/${tanggal}`} className="fokus-ring flex min-h-16 items-center gap-4 px-4 py-3 hover:bg-latar">{isi}</Link>
   ) : (
     <div className="flex min-h-16 items-center gap-4 px-4 py-3">{isi}</div>
   )

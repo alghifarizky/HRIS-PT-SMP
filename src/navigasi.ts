@@ -10,6 +10,7 @@ export type ItemNav = { ke: string; label: string; ikon: LucideIcon }
 const m = {
   beranda: { ke: '/beranda', label: 'Beranda', ikon: House },
   absensi: { ke: '/absensi', label: 'Absensi', ikon: Clock },
+  absensiTim: { ke: '/absensi/tim', label: 'Absensi', ikon: Clock }, // Atasan: tab Absensi = absensi tim (B2 hal 23)
   pengajuan: { ke: '/pengajuan', label: 'Pengajuan', ikon: FileText },
   slip: { ke: '/slip', label: 'Slip Gaji', ikon: CreditCard },
   persetujuan: { ke: '/persetujuan', label: 'Persetujuan', ikon: SquareCheck },
@@ -31,7 +32,7 @@ const p = {
 /** Bottom nav shell mobile. HR memakainya lewat "Akun saya" (absen, pengajuan & slip sendiri). */
 export const NAV_MOBILE: Partial<Record<Peran, ItemNav[]>> = {
   karyawan: [m.beranda, m.absensi, m.pengajuan, m.slip, m.profil],
-  atasan: [m.beranda, m.absensi, m.pengajuan, m.persetujuan, m.profil], // slip lewat Profil
+  atasan: [m.beranda, m.absensiTim, m.pengajuan, m.persetujuan, m.profil], // slip lewat Profil
   hr: [m.beranda, m.absensi, m.pengajuan, m.slip, m.profil],
 }
 
@@ -61,6 +62,10 @@ export const AKSES: Record<string, { label: string; peran: Peran[] }> = (() => {
     for (const [peran, items] of Object.entries(nav)) items.forEach((i) => tambah(i, peran as Peran))
   NAV_PANEL_MOBILE_DIREKSI.forEach((i) => tambah(i, 'direksi'))
   tambah(m.slip, 'atasan') // Atasan membuka slip dari Profil
+  tambah(m.absensi, 'atasan') // "Riwayat saya" dari halaman Absensi tim
+  tambah({ ke: '/absensi/tim/:id', label: 'Riwayat anggota' }, 'atasan')
+  tambah({ ke: '/absensi/tim/:id/profil', label: 'Profil anggota tim' }, 'atasan')
+  tambah({ ke: '/absensi/tim/:id/:tanggal', label: 'Detail absensi' }, 'atasan')
   tambah({ ke: '/panel/karyawan/tambah', label: 'Karyawan' }, 'hr') // Direksi tanpa tombol tambah (PRD EMP-08)
   tambah({ ke: '/panel/karyawan/:id/edit', label: 'Karyawan' }, 'hr')
   for (const r of ['hr', 'direksi'] as const) tambah({ ke: '/panel/karyawan/:id', label: 'Karyawan' }, r)

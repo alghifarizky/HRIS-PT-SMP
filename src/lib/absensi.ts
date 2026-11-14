@@ -68,3 +68,37 @@ export function susunRiwayat<A extends AbsensiRingkas>(p: {
     autoClockOut: p.absensi.filter((a) => a.auto_clock_out).length,
   }
 }
+
+type Anggota = { id: string; tanggal_masuk: string | null; aktif: boolean; tanggal_nonaktif: string | null }
+export type StatusTim = 'hadir' | 'belum_clock_in' | 'tanpa_absensi'
+
+/**
+ * Absensi tim satu tanggal (ATT-08, B2 hal 23–24). Anggota dihitung bila sudah mulai bekerja dan masih aktif
+ * pada tanggal itu (tanggal_nonaktif = hari terakhir aktif). Hari ini tanpa clock in = "belum clock in";
+ * hari kerja yang sudah lewat = "tanpa absensi". Cuti/sakit/izin menyusul (Fase 4).
+ */
+export function susunHariTim<A extends Anggota, B extends { pengguna_id: string; terlambat: boolean }>(p: {
+  anggota: A[]
+  absensi: B[]
+  tanggal: string
+  hariIni: string
+}) {
+  const perOrang = new Map(p.absensi.map((a) => [a.pengguna_id, a]))
+  const terhitung = p.anggota.filter(
+    (a) =>
+      (!a.tanggal_masuk || a.tanggal_masuk <= p.tanggal) &&
+      (a.aktif ? !a.tanggal_nonaktif || a.tanggal_nonaktif >= p.tanggal : !!a.tanggal_nonaktif && a.tanggal_nonaktif >= p.tanggal),
+  )
+  const baris = terhitung.map((a) => {
+    const absensi = perOrang.get(a.id) ?? null
+    const status: StatusTim = absensi ? 'hadir' : p.tanggal === p.hariIni ? 'belum_clock_in' : 'tanpa_absensi'
+    return { anggota: a, absensi, status }
+  })
+  return {
+    baris,
+    jumlah: terhitung.length,
+    hadir: baris.filter((b) => b.status === 'hadir').length,
+    terlambat: baris.filter((b) => b.absensi?.terlambat).length,
+    belum: baris.filter((b) => b.status !== 'hadir').length,
+  }
+}

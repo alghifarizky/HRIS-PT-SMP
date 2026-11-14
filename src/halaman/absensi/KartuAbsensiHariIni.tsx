@@ -10,7 +10,7 @@ import { useAbsensiHariIni } from './data'
 
 const hhmm = (t: string) => t.slice(0, 5)
 
-export default function KartuAbsensiHariIni() {
+export default function KartuAbsensiHariIni({ judul = 'Absensi hari ini' }: { judul?: string }) {
   const q = useAbsensiHariIni()
 
   return (
@@ -20,13 +20,13 @@ export default function KartuAbsensiHariIni() {
       ) : q.isError ? (
         <KeadaanGalat judul="Absensi hari ini gagal dimuat" onCobaLagi={() => q.refetch()} />
       ) : (
-        <Isi {...q.data} />
+        <Isi {...q.data} judul={judul} />
       )}
     </section>
   )
 }
 
-function Isi({ absensi: a, jadwal, mulaiBekerja }: NonNullable<ReturnType<typeof useAbsensiHariIni>['data']>) {
+function Isi({ absensi: a, jadwal, mulaiBekerja, judul }: NonNullable<ReturnType<typeof useAbsensiHariIni>['data']> & { judul: string }) {
   const masuk = a ? new Date(a.jam_masuk) : null
   const keluar = a?.jam_keluar ? new Date(a.jam_keluar) : null
   const cepat = keluar && jadwal ? menitLebihCepat(keluar, jadwal.jam_pulang) : 0
@@ -34,7 +34,7 @@ function Isi({ absensi: a, jadwal, mulaiBekerja }: NonNullable<ReturnType<typeof
   if (mulaiBekerja && !a) {
     return (
       <>
-        <h2 id="judul-absensi-hari-ini" className="text-[17px] leading-6 font-semibold">Absensi hari ini</h2>
+        <h2 id="judul-absensi-hari-ini" className="text-[17px] leading-6 font-semibold">{judul}</h2>
         <p className="mt-2 rounded-kontrol bg-info-latar p-3 text-[15px] text-info">
           Anda mulai bekerja {tanggalPanjang(dariTanggalDb(mulaiBekerja))}. Clock in tersedia mulai tanggal itu.
         </p>
@@ -44,7 +44,7 @@ function Isi({ absensi: a, jadwal, mulaiBekerja }: NonNullable<ReturnType<typeof
 
   return (
     <>
-      <h2 id="judul-absensi-hari-ini" className="text-[17px] leading-6 font-semibold">Absensi hari ini</h2>
+      <h2 id="judul-absensi-hari-ini" className="text-[17px] leading-6 font-semibold">{judul}</h2>
       <p className="mt-0.5 text-[15px] text-teks-sekunder">
         {jadwal ? `Jam kerja ${hhmm(jadwal.jam_masuk)} – ${hhmm(jadwal.jam_pulang)} WIB` : 'Hari ini libur — tidak ada jadwal kerja.'}
       </p>

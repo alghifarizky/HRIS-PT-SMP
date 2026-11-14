@@ -72,9 +72,13 @@ export function useSelisihServer() {
   })
 }
 
-/** Riwayat satu bulan ("YYYY-MM") milik pengguna sendiri + bahan penyusun (libur, hari kerja, tanggal masuk). */
-export function useRiwayatAbsensi(bulan: string) {
-  const id = useProfil().data!.id
+export type TargetAbsensi = { id: string; tanggal_masuk: string | null }
+
+/** Riwayat satu bulan ("YYYY-MM") + bahan penyusun. Tanpa `target` = milik sendiri; dengan `target` = anggota tim
+ *  (Atasan tidak bisa membaca baris pengguna bawahan — tanggal masuk datang dari RPC anggota_tim). */
+export function useRiwayatAbsensi(bulan: string, target?: TargetAbsensi) {
+  const idSaya = useProfil().data!.id
+  const id = target?.id ?? idSaya
   return useQuery({
     queryKey: ['riwayat_absensi', id, bulan],
     queryFn: async () => {
@@ -85,7 +89,7 @@ export function useRiwayatAbsensi(bulan: string) {
         supabase.from('absensi').select(KOLOM_ABSENSI).eq('pengguna_id', id).gte('tanggal', awal).lt('tanggal', bulanDepan),
         supabase.from('hari_libur').select('tanggal').gte('tanggal', awal).lt('tanggal', bulanDepan),
         supabase.from('jadwal_kerja').select('hari, jam_pulang'),
-        supabase.from('pengguna').select('tanggal_masuk').eq('id', id).single(),
+        target ? Promise.resolve({ data: { tanggal_masuk: target.tanggal_masuk }, error: null }) : supabase.from('pengguna').select('tanggal_masuk').eq('id', id).single(),
       ])
       for (const r of [absensi, libur, jadwal, saya]) if (r.error) throw r.error
       return {
@@ -100,9 +104,10 @@ export function useRiwayatAbsensi(bulan: string) {
   })
 }
 
-/** Satu hari absensi milik sendiri + jadwal hari itu. */
-export function useAbsensiTanggal(tanggal: string) {
-  const id = useProfil().data!.id
+/** Satu hari absensi (milik sendiri, atau `penggunaId` anggota tim) + jadwal hari itu. */
+export function useAbsensiTanggal(tanggal: string, penggunaId?: string) {
+  const idSaya = useProfil().data!.id
+  const id = penggunaId ?? idSaya
   return useQuery({
     queryKey: ['absensi_tanggal', id, tanggal],
     queryFn: async () => {
@@ -128,6 +133,49 @@ export function useFotoSelfie(path: string | null) {
       const { data, error } = await supabase.storage.from('selfie').createSignedUrl(path!, 60)
       if (error) throw error
       return data.signedUrl
+    },
+  })
+}
+
+export type AnggotaTim = {
+  id: string
+  nama: string
+  nik: string | null
+  jabatan: string | null
+  tanggal_masuk: string | null
+  aktif: boolean
+  tanggal_nonaktif: string | null
+}
+
+/** Bawahan langsung (RPC anggota_tim — data publik terbatas, security §4.4). */
+export function useAnggotaTim() {
+  const id = useProfil().data!.id
+  return useQuery({
+    queryKey: ['anggota_tim', id],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('anggota_tim')
+      if (error) throw error
+      return data as AnggotaTim[]
+    },
+  })
+}
+
+/** Absensi seluruh bawahan pada satu tanggal + jadwal tanggal itu (RLS: atasan membaca absensi bawahan). */
+export function useAbsensiTim(tanggal: string) {
+  const id = useProfil().data!.id
+  return useQuery({
+    queryKey: ['absensi_tim', id, tanggal],
+    queryFn: async () => {
+      const [absensi, jadwal] = await Promise.all([
+        supabase.from('absensi').select(`pengguna_id, ${KOLOM_ABSENSI}`).eq('tanggal', tanggal).neq('pengguna_id', id),
+        supabase.rpc('jadwal_tanggal', { tgl: tanggal }),
+      ])
+      if (absensi.error) throw absensi.error
+      if (jadwal.error) throw jadwal.error
+      return {
+        absensi: absensi.data as (BarisAbsensi & { pengguna_id: string })[],
+        jadwal: ((jadwal.data as Jadwal[])[0] ?? null) as Jadwal | null,
+      }
     },
   })
 }

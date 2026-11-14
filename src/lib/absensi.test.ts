@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { durasi, hariIso, jamWib, menitLebihCepat, menitTerlambat, susunRiwayat } from './absensi'
+import { durasi, hariIso, jamWib, menitLebihCepat, menitTerlambat, susunHariTim, susunRiwayat } from './absensi'
 
 const wib = (s: string) => new Date(`${s}+07:00`)
 
@@ -34,4 +34,28 @@ describe('susunRiwayat', () => {
   it('bulan lalu penuh sampai akhir bulan', () =>
     expect(susunRiwayat({ ...dasar, bulan: '2026-10', absensi: [] }).baris[0].tanggal).toBe('2026-10-31'))
   it('hariIso', () => expect([hariIso('2026-11-09'), hariIso('2026-11-15')]).toEqual([1, 7]))
+})
+
+describe('susunHariTim', () => {
+  const ang = (id: string, o: Partial<{ tanggal_masuk: string | null; aktif: boolean; tanggal_nonaktif: string | null }> = {}) => ({
+    id, tanggal_masuk: '2020-01-01', aktif: true, tanggal_nonaktif: null, ...o,
+  })
+  const anggota = [
+    ang('rina'), ang('dimas'), ang('fajar'),
+    ang('baru', { tanggal_masuk: '2026-11-16' }), // belum mulai
+    ang('resign', { aktif: false, tanggal_nonaktif: '2026-11-10' }), // aktif s.d. 10 Nov
+    ang('jadwal', { tanggal_nonaktif: '2026-11-30' }), // terjadwal nonaktif, masih aktif
+  ]
+  const absensi = [{ pengguna_id: 'rina', terlambat: false }, { pengguna_id: 'dimas', terlambat: true }]
+
+  it('hari ini: hadir, terlambat, belum clock in; yang belum mulai & sudah nonaktif tidak dihitung', () => {
+    const r = susunHariTim({ anggota, absensi, tanggal: '2026-11-12', hariIni: '2026-11-12' })
+    expect(r.baris.map((b) => `${b.anggota.id}:${b.status}`)).toEqual(['rina:hadir', 'dimas:hadir', 'fajar:belum_clock_in', 'jadwal:belum_clock_in'])
+    expect([r.jumlah, r.hadir, r.terlambat, r.belum]).toEqual([4, 2, 1, 2])
+  })
+  it('tanggal lewat: tanpa absensi; anggota nonaktif masih dihitung pada hari terakhirnya', () => {
+    const r = susunHariTim({ anggota, absensi: [], tanggal: '2026-11-10', hariIni: '2026-11-12' })
+    expect(r.baris.map((b) => `${b.anggota.id}:${b.status}`)).toContain('resign:tanpa_absensi')
+    expect(r.jumlah).toBe(5)
+  })
 })
