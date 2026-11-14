@@ -98,6 +98,8 @@ Keterangan: **R** baca, **C** buat, **U** ubah, **D** hapus, **sendiri** = baris
 | `slip_gaji` | R sendiri jika payroll `final` | R sendiri jika `final` | R/C/U selama bukan `final` | R semua |
 | `potongan` | R milik slip sendiri jika `final` | sama | R/C/U/D selama bukan `final` | R semua |
 | `notifikasi` | R/U(`dibaca`) sendiri | sama | sama | sama |
+
+> Pembuatan, pembatalan, dan keputusan pengajuan (C/U pada `pengajuan_*` & `persetujuan`) **hanya lewat RPC** `ajukan_lembur`, `ajukan_cuti`, `batalkan_pengajuan`, `putuskan_pengajuan` (security definer, memvalidasi batas waktu, saldo, tabrakan tanggal, dan penyetuju yang sah). Client tidak punya hak INSERT/UPDATE langsung; notifikasi dibuat oleh RPC tersebut.
 | `jadwal_kerja`, `hari_libur`, `pengaturan` | R | R | R/C/U/D | R |
 | `log_audit` | — | — | R | R |
 
@@ -126,7 +128,7 @@ RLS bekerja per **baris**, bukan per kolom. Agar Atasan tidak melihat `no_ktp` &
 | Bucket | Isi | Akses |
 |---|---|---|
 | `selfie` | Foto clock in/out | Privat. Upload: pemilik. Baca: pemilik, atasan langsung, HR |
-| `lampiran` | Surat dokter / dokumen | Privat. Upload: pemilik. Baca: pemilik, penyetuju terkait, HR |
+| `lampiran` | Surat dokter / dokumen | Privat. Upload: pemilik (folder `{uid}/`). Baca: pemilik, atasan langsung, HR; Direksi hanya untuk pengaju Atasan/HR |
 
 - **Semua bucket privat.** Tampilkan file dengan **signed URL** berumur pendek (mis. 60 detik), jangan public URL.
 - Struktur path: `{bucket}/{pengguna_id}/{tanggal}-{uuid}.{ext}` — policy mencocokkan folder pertama dengan `auth.uid()`.
