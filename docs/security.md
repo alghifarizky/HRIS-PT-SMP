@@ -107,7 +107,7 @@ Keterangan: **R** baca, **C** buat, **U** ubah, **D** hapus, **sendiri** = baris
 
 ### 4.4 Kolom sensitif
 RLS bekerja per **baris**, bukan per kolom. Agar Atasan tidak melihat `no_ktp` & `gaji_pokok` bawahan:
-- Buat **view** `pengguna_publik` (id, nama, nik, jabatan, atasan_id) untuk kebutuhan Atasan.
+- Kebutuhan Atasan dilayani RPC `anggota_tim()` (security definer, hanya bawahan langsung pemanggil): id, nama, nik, jabatan, tanggal masuk, status aktif/nonaktif, dan `saldo_cuti` (untuk menilai pengajuan cuti — keputusan Al 14 Nov 2026). Tanpa gaji, KTP, alamat, tanggal lahir. (Menggantikan rencana view `pengguna_publik`.)
 - Tabel `pengguna` penuh hanya dapat dibaca pemilik baris, HR, dan Direksi.
 - Di UI, `no_ktp` **selalu tersamar**. HR & Direksi dapat menekan "Tampilkan"; nomor lengkap diambil lewat RPC `lihat_ktp(pengguna_id)` yang memeriksa peran pemanggil dan mencatat aksi `lihat_ktp` ke `log_audit` (tanpa menyimpan nomornya).
 

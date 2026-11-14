@@ -1,6 +1,6 @@
 -- Uji RPC anggota_tim. Jalankan: npx supabase test db
 begin;
-select plan(5);
+select plan(6);
 alter table public.pengguna alter column tanggal_masuk set default '2020-01-01';
 
 insert into auth.users (id, email) values
@@ -24,6 +24,7 @@ select results_eq('select nama, jabatan from public.anggota_tim()', $$ values ('
 select is((select count(*)::int from public.pengguna), 1, 'Tabel pengguna tetap hanya baris sendiri bagi Atasan');
 select ok((select not (proargnames && array['gaji_pokok', 'no_ktp', 'alamat', 'tanggal_lahir']) from pg_proc where proname = 'anggota_tim'),
   'RPC tidak memuat gaji, KTP, alamat, tanggal lahir');
+select ok((select bool_and(saldo_cuti is not null) from public.anggota_tim()), 'Atasan melihat saldo cuti bawahan (B2 hal 19)');
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000c1","role":"authenticated"}', true);
 select is((select count(*)::int from public.anggota_tim()), 0, 'Karyawan tanpa bawahan mendapat daftar kosong');
 reset role;

@@ -40,6 +40,9 @@ export const hariIniDb = () => new Intl.DateTimeFormat('en-CA', { timeZone: ZONA
 
 const fmtTglSingkat = new Intl.DateTimeFormat('id-ID', { timeZone: ZONA, weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
 const fmtJamMenit = new Intl.DateTimeFormat('id-ID', { timeZone: ZONA, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+/** "Rina Wulandari" → "RW" (avatar) */
+export const inisial = (nama: string) => nama.split(' ').slice(0, 2).map((k) => k[0]).join('').toUpperCase()
+
 /** "Kam, 12 Nov 2026" */
 export const tanggalSingkat = (d: Date) => fmtTglSingkat.format(d)
 

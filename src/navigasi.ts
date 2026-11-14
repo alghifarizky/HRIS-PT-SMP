@@ -56,6 +56,7 @@ export const KEMBALI_MOBILE: Record<string, (p: Record<string, string | undefine
   '/pengajuan/lembur/ajukan': () => '/pengajuan',
   '/pengajuan/cuti/ajukan': () => '/pengajuan?tab=cuti',
   '/pengajuan/:jenis/:id': (p) => (p.jenis === 'cuti' ? '/pengajuan?tab=cuti' : '/pengajuan'),
+  '/persetujuan/:jenis/:id': (p) => (p.jenis === 'cuti' ? '/persetujuan?tab=cuti' : '/persetujuan'),
 }
 
 /** Siapa boleh membuka tiap halaman (UX saja — keamanan di RLS). Diturunkan dari menu + pengecualian. */
@@ -73,6 +74,7 @@ export const AKSES: Record<string, { label: string; peran: Peran[] }> = (() => {
   tambah({ ke: '/absensi/tim/:id', label: 'Riwayat anggota' }, 'atasan')
   tambah({ ke: '/absensi/tim/:id/profil', label: 'Profil anggota tim' }, 'atasan')
   tambah({ ke: '/absensi/tim/:id/:tanggal', label: 'Detail absensi' }, 'atasan')
+  tambah({ ke: '/persetujuan/:jenis/:id', label: 'Detail persetujuan' }, 'atasan')
   tambah({ ke: '/panel/karyawan/tambah', label: 'Karyawan' }, 'hr') // Direksi tanpa tombol tambah (PRD EMP-08)
   tambah({ ke: '/panel/karyawan/:id/edit', label: 'Karyawan' }, 'hr')
   for (const r of ['hr', 'direksi'] as const) tambah({ ke: '/panel/karyawan/:id', label: 'Karyawan' }, r)

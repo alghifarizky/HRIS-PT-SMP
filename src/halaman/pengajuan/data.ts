@@ -18,9 +18,9 @@ type Dasar = { id: string; nomor: string; status: StatusPengajuan; tingkat_berik
 export type Lembur = Dasar & { tanggal: string; jam_mulai: string; jam_selesai: string; hari_libur: boolean }
 export type Cuti = Dasar & { jenis: JenisCuti; tanggal_mulai: string; tanggal_selesai: string; jumlah_hari: number; lampiran_path: string | null }
 
-const KOLOM = { lembur: 'id, nomor, status, tingkat_berikut, alasan, diajukan_pada, selesai_pada, tanggal, jam_mulai, jam_selesai, hari_libur',
+export const KOLOM = { lembur: 'id, nomor, status, tingkat_berikut, alasan, diajukan_pada, selesai_pada, tanggal, jam_mulai, jam_selesai, hari_libur',
   cuti: 'id, nomor, status, tingkat_berikut, alasan, diajukan_pada, selesai_pada, jenis, tanggal_mulai, tanggal_selesai, jumlah_hari, lampiran_path' }
-const TABEL = { lembur: 'pengajuan_lembur', cuti: 'pengajuan_cuti' } as const
+export const TABEL = { lembur: 'pengajuan_lembur', cuti: 'pengajuan_cuti' } as const
 
 export function usePengajuanSaya<J extends JenisPengajuan>(jenis: J) {
   const id = useProfil().data!.id

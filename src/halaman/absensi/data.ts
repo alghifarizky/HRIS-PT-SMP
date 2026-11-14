@@ -145,6 +145,7 @@ export type AnggotaTim = {
   tanggal_masuk: string | null
   aktif: boolean
   tanggal_nonaktif: string | null
+  saldo_cuti: number | null
 }
 
 /** Bawahan langsung (RPC anggota_tim — data publik terbatas, security §4.4). */
