@@ -10,7 +10,7 @@ import { supabase } from '../../lib/supabase'
 import { useProfil } from '../../auth/sesi'
 import { NAMA_APLIKASI } from '../../lib/aplikasi'
 import { durasi, jamWib, menitLebihCepat, menitTerlambat } from '../../lib/absensi'
-import { hariIniDb, tanggalPanjang } from '../../lib/format'
+import { dariTanggalDb, hariIniDb, tanggalPanjang, tanggalPendek } from '../../lib/format'
 import { BannerGalat, Tombol } from '../../komponen/form'
 import { Badge, Skeleton } from '../../komponen/keadaan'
 import { useAbsensiHariIni, useSelisihServer, type BarisAbsensi, type Jadwal } from './data'
@@ -28,15 +28,18 @@ export default function ClockKamera() {
   const q = useAbsensiHariIni()
   // Mode dikunci dari data PERTAMA: setelah RPC berhasil data dimuat ulang (sudah ada jam masuk/keluar) —
   // menurunkan mode ulang membuat layar sukses berganti mode / dialihkan ke Beranda (bug 13 Nov 2026).
-  const [awal, setAwal] = useState<{ mode: 'masuk' | 'keluar' | 'selesai'; jadwal: Jadwal | null } | null>(null)
+  const [awal, setAwal] = useState<{ mode: 'masuk' | 'keluar' | 'selesai'; jadwal: Jadwal | null; mulaiBekerja: string | null } | null>(null)
   if (q.data && !awal) {
     const a = q.data.absensi
-    setAwal({ mode: a?.jam_keluar ? 'selesai' : a ? 'keluar' : 'masuk', jadwal: q.data.jadwal })
+    setAwal({ mode: a?.jam_keluar ? 'selesai' : a ? 'keluar' : 'masuk', jadwal: q.data.jadwal, mulaiBekerja: a ? null : q.data.mulaiBekerja })
   }
 
   if (q.isError && !awal) return <LayarGalat judul="Clock In" ikon={<CircleAlert />} teks="Data absensi gagal dimuat. Periksa koneksi Anda, lalu coba lagi." aksi={<Tombol onClick={() => q.refetch()}>Coba lagi</Tombol>} />
   if (!awal) return <div className="min-h-dvh bg-teks p-6"><Skeleton baris={3} /></div>
   if (awal.mode === 'selesai') return <Navigate to="/beranda" replace /> // hari ini sudah lengkap
+  // Sebelum tanggal masuk: tolak di awal, kamera tidak dinyalakan (server tetap menolak bila dipaksa)
+  if (awal.mulaiBekerja)
+    return <LayarGalat judul="Clock In" ikon={<CircleAlert />} teks={`Anda baru bisa clock in mulai ${tanggalPendek(dariTanggalDb(awal.mulaiBekerja))}.`} />
   return <Alur mode={awal.mode} jadwal={awal.jadwal} />
 }
 

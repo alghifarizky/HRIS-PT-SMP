@@ -25,14 +25,15 @@ export const KOLOM_ABSENSI =
   'id, tanggal, jam_masuk, jam_keluar, foto_masuk_path, foto_keluar_path, terlambat, auto_clock_out, dikoreksi_oleh, alasan_koreksi, jam_masuk_semula, jam_keluar_semula, dikoreksi_pada, dikoreksi_oleh_nama'
 export type Jadwal = { jam_masuk: string; jam_pulang: string }
 
-/** Absensi & jadwal hari ini. jadwal null = hari libur (Minggu / tanggal merah / cuti bersama). */
+/** Absensi & jadwal hari ini. jadwal null = hari libur (Minggu / tanggal merah / cuti bersama).
+ *  belumMulai = hari ini sebelum tanggal masuk (clock in ditolak server — dicek di awal agar tidak sempat memotret). */
 export function useAbsensiHariIni() {
   const id = useProfil().data!.id
   const tanggal = hariIniDb()
   return useQuery({
     queryKey: ['absensi_hari_ini', id, tanggal],
     queryFn: async () => {
-      const [absensi, jadwal] = await Promise.all([
+      const [absensi, jadwal, saya] = await Promise.all([
         supabase
           .from('absensi')
           .select(KOLOM_ABSENSI)
@@ -40,10 +41,18 @@ export function useAbsensiHariIni() {
           .eq('tanggal', tanggal)
           .maybeSingle(),
         supabase.rpc('jadwal_tanggal', { tgl: tanggal }),
+        supabase.from('pengguna').select('tanggal_masuk').eq('id', id).single(),
       ])
       if (absensi.error) throw absensi.error
       if (jadwal.error) throw jadwal.error
-      return { tanggal, absensi: absensi.data as BarisAbsensi | null, jadwal: ((jadwal.data as Jadwal[])[0] ?? null) as Jadwal | null }
+      if (saya.error) throw saya.error
+      const tanggalMasuk = (saya.data as { tanggal_masuk: string | null }).tanggal_masuk
+      return {
+        tanggal,
+        absensi: absensi.data as BarisAbsensi | null,
+        jadwal: ((jadwal.data as Jadwal[])[0] ?? null) as Jadwal | null,
+        mulaiBekerja: tanggalMasuk && tanggal < tanggalMasuk ? tanggalMasuk : null,
+      }
     },
   })
 }

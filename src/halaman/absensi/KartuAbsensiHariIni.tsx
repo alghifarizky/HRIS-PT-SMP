@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Camera, CircleCheck } from 'lucide-react'
 import { durasi, jamWib, menitLebihCepat } from '../../lib/absensi'
+import { dariTanggalDb, tanggalPanjang } from '../../lib/format'
 import { Badge, KeadaanGalat, Skeleton } from '../../komponen/keadaan'
 import { useAbsensiHariIni } from './data'
 
@@ -25,10 +26,21 @@ export default function KartuAbsensiHariIni() {
   )
 }
 
-function Isi({ absensi: a, jadwal }: NonNullable<ReturnType<typeof useAbsensiHariIni>['data']>) {
+function Isi({ absensi: a, jadwal, mulaiBekerja }: NonNullable<ReturnType<typeof useAbsensiHariIni>['data']>) {
   const masuk = a ? new Date(a.jam_masuk) : null
   const keluar = a?.jam_keluar ? new Date(a.jam_keluar) : null
   const cepat = keluar && jadwal ? menitLebihCepat(keluar, jadwal.jam_pulang) : 0
+
+  if (mulaiBekerja && !a) {
+    return (
+      <>
+        <h2 id="judul-absensi-hari-ini" className="text-[17px] leading-6 font-semibold">Absensi hari ini</h2>
+        <p className="mt-2 rounded-kontrol bg-info-latar p-3 text-[15px] text-info">
+          Anda mulai bekerja {tanggalPanjang(dariTanggalDb(mulaiBekerja))}. Clock in tersedia mulai tanggal itu.
+        </p>
+      </>
+    )
+  }
 
   return (
     <>
