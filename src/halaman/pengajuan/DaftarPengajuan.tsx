@@ -30,7 +30,7 @@ export default function DaftarPengajuan() {
           </button>
         ))}
       </div>
-      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {FILTER.map((f) => (
           <button key={f} type="button" aria-pressed={status === f} onClick={() => atur({ status: f })}
             className={`fokus-ring h-9 shrink-0 rounded-full border px-4 text-[15px] font-medium ${status === f ? 'border-primer bg-primer-100 text-primer' : 'border-garis bg-permukaan'}`}>
