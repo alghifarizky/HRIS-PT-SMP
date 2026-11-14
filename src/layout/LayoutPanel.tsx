@@ -1,5 +1,6 @@
 // Shell panel HR & Direksi — desain B3A hal 3, B4 hal 1 (≥ 1024 px) & B4 hal 46 (Direksi < 1024 px).
 // HR di layar kecil diarahkan ke "Akun saya" (keputusan Al, 13 Nov 2026 — panel HR tidak punya desain mobile).
+import { useEffect, useRef } from 'react'
 import { Link, matchPath, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { Laptop, LogOut, Search, User } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -24,12 +25,18 @@ function ItemMenu({ item }: { item: ItemNav }) {
 export default function LayoutPanel() {
   const profil = useProfil().data!
   const { pathname } = useLocation()
+  const isi = useRef<HTMLElement>(null)
+  useEffect(() => {
+    isi.current?.scrollTo(0, 0) // layar kecil: area isi yang scroll
+    window.scrollTo(0, 0) // layar lebar: halaman yang scroll
+  }, [pathname])
   const judul = Object.entries(AKSES).find(([ke]) => matchPath(ke, pathname))?.[1].label ?? ''
   const hr = profil.role === 'hr'
   const inisial = profil.nama.split(' ').slice(0, 2).map((k) => k[0]).join('').toUpperCase()
 
   return (
-    <div className="min-h-dvh bg-latar lg:flex">
+    // < 1024 px: kolom setinggi layar (hanya isi yang scroll, bottom nav diam); ≥ 1024 px: halaman biasa
+    <div className="flex h-dvh flex-col bg-latar lg:h-auto lg:min-h-dvh lg:flex-row">
       <aside className="sticky top-0 hidden h-dvh w-[248px] shrink-0 flex-col overflow-y-auto border-r border-garis bg-permukaan lg:flex">
         <div className="flex h-16 items-center gap-3 px-5">
           <img src="/logo-smp.png" alt="" width={36} height={36} className="size-9" />
@@ -60,8 +67,8 @@ export default function LayoutPanel() {
         </nav>
       </aside>
 
-      <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-10 hidden h-16 items-center justify-between border-b border-garis bg-permukaan px-8 lg:flex">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-10 hidden h-16 shrink-0 items-center justify-between border-b border-garis bg-permukaan px-8 lg:flex">
           <p className="text-[22px] leading-7 font-semibold">{judul}</p>
           <div className="flex items-center gap-4">
             <CariKaryawan />
@@ -84,16 +91,18 @@ export default function LayoutPanel() {
         {hr ? (
           <>
             <PanelHrLayarKecil />
-            <main className="hidden p-8 lg:block">
+            <main className="hidden flex-1 p-8 lg:block">
               <Outlet />
             </main>
           </>
         ) : (
           <>
-            <main className="mx-auto max-w-[480px] px-4 pt-6 pb-28 lg:max-w-none lg:p-8">
-              <Outlet />
+            <main ref={isi} className="min-h-0 flex-1 overflow-y-auto overscroll-contain lg:overflow-visible">
+              <div className="mx-auto max-w-[480px] px-4 pt-6 pb-8 lg:max-w-none lg:p-8">
+                <Outlet />
+              </div>
             </main>
-            <div className="lg:hidden">
+            <div className="shrink-0 lg:hidden">
               <BottomNav items={NAV_PANEL_MOBILE_DIREKSI} />
             </div>
           </>

@@ -11,10 +11,12 @@ const ROOT = ['/beranda', '/panel']
 export const judulMobile = (pathname: string) =>
   ROOT.includes(pathname) ? NAMA_APLIKASI : (Object.entries(AKSES).find(([ke]) => matchPath(ke, pathname))?.[1].label ?? NAMA_APLIKASI)
 
-/** Bottom nav — tab aktif: pil biru + label tebal + aria-current="page" (B1 hal 2). */
+/** Bottom nav — tab aktif: pil biru + label tebal + aria-current="page" (B1 hal 2).
+ *  Bukan position:fixed — diletakkan di dasar kolom setinggi layar (lihat LayoutMobile) agar tidak ikut
+ *  bergeser saat scroll elastis / bilah alamat Safari iOS mengecil. */
 export function BottomNav({ items }: { items: ItemNav[] }) {
   return (
-    <nav aria-label="Navigasi utama" className="fixed inset-x-0 bottom-0 z-10 border-t border-garis bg-permukaan pb-[env(safe-area-inset-bottom)]">
+    <nav aria-label="Navigasi utama" className="z-10 shrink-0 border-t border-garis bg-permukaan pb-[env(safe-area-inset-bottom)]">
       <ul className="mx-auto flex max-w-[480px]">
         {items.map(({ ke, label, ikon: Ikon }) => (
           <li key={ke} className="flex-1">
@@ -38,7 +40,7 @@ export function BottomNav({ items }: { items: ItemNav[] }) {
 /** Top app bar mobile: judul halaman (nama aplikasi di Beranda) + lonceng. */
 export function TopBarMobile({ ke, judul = NAMA_APLIKASI, ekstra }: { ke: string; judul?: string; ekstra?: ReactNode }) {
   return (
-    <header className="sticky top-0 z-10 border-b border-garis bg-permukaan">
+    <header className="z-10 shrink-0 border-b border-garis bg-permukaan pt-[env(safe-area-inset-top)]">
       <div className="mx-auto flex h-14 max-w-[480px] items-center justify-between pr-2 pl-4">
         <span className="min-w-0 truncate text-[17px] leading-6 font-bold">{judul}</span>
         <div className="flex items-center gap-1">

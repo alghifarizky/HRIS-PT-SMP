@@ -26,7 +26,7 @@ export function useDaftarKaryawan() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('pengguna')
-        .select('id, nik, nama, email, jabatan, role, atasan_id, atasan:pengguna!atasan_id(nama), tanggal_masuk, saldo_cuti, aktif, tanggal_nonaktif')
+        .select('id, nik, nama, email, jabatan, role, atasan_id, atasan:atasan_id(nama), tanggal_masuk, saldo_cuti, aktif, tanggal_nonaktif')
         .order('nik', { nullsFirst: false })
         .order('nama')
       if (error) throw error
@@ -66,7 +66,7 @@ export function useKaryawan(id: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('pengguna')
-        .select('id, email, nama, role, aktif, atasan_id, atasan:pengguna!atasan_id(nama), nik, jabatan, tanggal_lahir, alamat, tanggal_masuk, no_ktp_tersamar, status_menikah, jumlah_tanggungan, gaji_pokok, saldo_cuti, tanggal_nonaktif, alasan_nonaktif, catatan_nonaktif')
+        .select('id, email, nama, role, aktif, atasan_id, atasan:atasan_id(nama), nik, jabatan, tanggal_lahir, alamat, tanggal_masuk, no_ktp_tersamar, status_menikah, jumlah_tanggungan, gaji_pokok, saldo_cuti, tanggal_nonaktif, alasan_nonaktif, catatan_nonaktif')
         .eq('id', id!)
         .maybeSingle()
       if (error) throw error
