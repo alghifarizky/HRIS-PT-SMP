@@ -44,6 +44,17 @@ describe('uraikanLog penonaktifan', () => {
     ]))
 })
 
+describe('uraikanLog absensi', () => {
+  it('jam absensi (timestamp) tampil sebagai jam WIB, kolom teknis diabaikan', () =>
+    expect(
+      uraikanLog({ aksi: 'update', nilai_lama: { jam_keluar: '2026-11-13T08:00:00+00:00', jam_keluar_semula: null, alasan_koreksi: 'a' },
+        nilai_baru: { jam_keluar: '2026-11-13T09:10:00+00:00', jam_keluar_semula: '2026-11-13T08:00:00+00:00', alasan_koreksi: 'b' } }, nama, 'absensi').perubahan,
+    ).toEqual([
+      { label: 'Jam keluar', lama: '15:00 WIB', baru: '16:10 WIB' },
+      { label: 'Alasan koreksi', lama: 'a', baru: 'b' },
+    ]))
+})
+
 describe('uraikanLog master data', () => {
   it('ubah jadwal', () =>
     expect(uraikanLog({ aksi: 'update', nilai_lama: { jam_pulang: '15:00:00' }, nilai_baru: { jam_pulang: '15:30:00' } }, nama, 'jadwal_kerja')).toEqual({

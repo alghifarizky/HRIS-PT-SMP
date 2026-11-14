@@ -26,7 +26,8 @@ type Log = BarisLog & {
   pelaku: { nama: string; role: Peran } | null
 }
 
-const OBJEK: Record<string, string> = { pengguna: 'Karyawan', jadwal_kerja: 'Jadwal kerja', hari_libur: 'Hari libur', pengaturan: 'Pengaturan' }
+const OBJEK: Record<string, string> = { pengguna: 'Karyawan', absensi: 'Absensi', jadwal_kerja: 'Jadwal kerja', hari_libur: 'Hari libur', pengaturan: 'Pengaturan' }
+const fmtTglObjek = new Intl.DateTimeFormat('id-ID', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Jakarta' })
 const AKSI: Record<Log['aksi'], { label: string; nada: 'sukses' | 'info' | 'bahaya' | 'ungu' }> = {
   insert: { label: 'Tambah', nada: 'sukses' },
   update: { label: 'Ubah', nada: 'info' },
@@ -75,13 +76,27 @@ export default function LogAudit() {
       if (s.aksi) k = k.eq('aksi', s.aksi)
       const { data, error, count } = await k
       if (error) throw error
-      return { baris: data as unknown as Log[], total: count ?? 0 }
+      const baris = data as unknown as Log[]
+      // Label objek absensi ("Absensi: Nama, Jum 13 Nov") — ambil pemilik & tanggal baris absensi di halaman ini
+      const idAbsensi = [...new Set(baris.filter((l) => l.tabel === 'absensi').map((l) => l.baris_id))]
+      const absensi = new Map<string, { tanggal: string; pengguna_id: string }>()
+      if (idAbsensi.length) {
+        const { data: ab, error: eAb } = await supabase.from('absensi').select('id, tanggal, pengguna_id').in('id', idAbsensi)
+        if (eAb) throw eAb
+        for (const a of ab as { id: string; tanggal: string; pengguna_id: string }[]) absensi.set(a.id, a)
+      }
+      return { baris, total: count ?? 0, absensi }
     },
   })
 
   const namaPengguna = (id: string) => daftar.data?.find((p) => p.id === id)?.nama ?? '(tidak dikenal)'
   const objek = (l: Log) => {
     if (l.tabel === 'pengguna') return `Karyawan: ${namaPengguna(l.baris_id)}`
+    if (l.tabel === 'absensi') {
+      // baris sudah dihapus → pakai nilai lama di log
+      const a = q.data?.absensi.get(l.baris_id) ?? (l.nilai_lama as { tanggal?: string; pengguna_id?: string } | null)
+      return a?.tanggal && a.pengguna_id ? `Absensi: ${namaPengguna(a.pengguna_id)}, ${fmtTglObjek.format(dariTanggalDb(a.tanggal)).replace('.', '')}` : 'Absensi'
+    }
     if (l.tabel === 'jadwal_kerja') return `Jadwal kerja: ${NAMA_HARI[Number(l.baris_id)] ?? l.baris_id}`
     if (l.tabel === 'hari_libur') return `Hari libur: ${tanggalPendek(dariTanggalDb(l.baris_id))}`
     return OBJEK[l.tabel] ?? l.tabel

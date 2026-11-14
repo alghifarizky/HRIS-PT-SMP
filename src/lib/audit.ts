@@ -1,6 +1,7 @@
 // Menerjemahkan baris log_audit menjadi kalimat — tab Riwayat perubahan (B3A hal 18) & layar Log audit (B3C hal 16–18).
 import { LABEL_PERAN } from '../navigasi'
 import { dariTanggalDb, rupiah, tanggalPendek } from './format'
+import { jamWib } from './absensi'
 import type { Peran } from '../auth/sesi'
 import { LABEL_ALASAN_NONAKTIF, type AlasanNonaktif } from '../halaman/karyawan/label'
 
@@ -13,10 +14,13 @@ const LABEL: Record<string, string> = {
   status_menikah: 'Status menikah', jumlah_tanggungan: 'Jumlah tanggungan', gaji_pokok: 'Gaji pokok', saldo_cuti: 'Saldo cuti',
   tanggal_nonaktif: 'Aktif sampai', alasan_nonaktif: 'Alasan nonaktif', catatan_nonaktif: 'Catatan nonaktif',
   // master data
-  tanggal: 'Tanggal', jenis: 'Jenis', keterangan: 'Keterangan', jam_masuk: 'Jam masuk', jam_pulang: 'Jam pulang',
+  tanggal: 'Tanggal', jenis: 'Jenis', keterangan: 'Keterangan', jam_masuk: 'Jam masuk', jam_keluar: 'Jam keluar', jam_pulang: 'Jam pulang',
   jatah_cuti_tahunan: 'Jatah cuti tahunan', tanggal_cut_off: 'Tanggal cut-off',
+  // absensi
+  pengguna_id: 'Karyawan', terlambat: 'Terlambat', auto_clock_out: 'Auto clock out', alasan_koreksi: 'Alasan koreksi',
 }
-const ABAIKAN = new Set(['id', 'no_ktp_tersamar']) // no_ktp_tersamar menggandakan no_ktp (sudah tersamar di log)
+// no_ktp_tersamar menggandakan no_ktp; kolom ringkasan koreksi absensi & path foto hanya turunan/teknis
+const ABAIKAN = new Set(['id', 'no_ktp_tersamar', 'jam_masuk_semula', 'jam_keluar_semula', 'dikoreksi_pada', 'dikoreksi_oleh', 'dikoreksi_oleh_nama', 'foto_masuk_path', 'foto_keluar_path'])
 
 function nilai(kunci: string, v: unknown, namaPengguna: (id: string) => string): string {
   if (v === null || v === undefined || v === '') return '—'
@@ -27,7 +31,10 @@ function nilai(kunci: string, v: unknown, namaPengguna: (id: string) => string):
     case 'gaji_pokok': return rupiah(Number(v))
     case 'saldo_cuti': return `${v} hari`
     case 'tanggal_lahir': case 'tanggal_masuk': case 'tanggal_nonaktif': case 'tanggal': return tanggalPendek(dariTanggalDb(String(v)))
-    case 'jam_masuk': case 'jam_pulang': return String(v).slice(0, 5)
+    // jadwal: "07:00:00"; absensi: timestamp lengkap → jam WIB
+    case 'jam_masuk': case 'jam_keluar': case 'jam_pulang': return String(v).includes('T') || String(v).includes(' ') ? `${jamWib(new Date(String(v)))} WIB` : String(v).slice(0, 5)
+    case 'terlambat': case 'auto_clock_out': return v ? 'Ya' : 'Tidak'
+    case 'pengguna_id': return namaPengguna(String(v))
     case 'jatah_cuti_tahunan': return `${v} hari`
     case 'tanggal_cut_off': return `tanggal ${v}`
     case 'jenis': return v === 'cuti_bersama' ? 'Cuti bersama' : v === 'libur_nasional' ? 'Libur nasional' : String(v)
