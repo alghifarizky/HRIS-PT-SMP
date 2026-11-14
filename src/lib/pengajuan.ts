@@ -31,3 +31,23 @@ export function rentangTanggal(mulai: string, selesai: string, denganHari = fals
   const awal = mulai.slice(0, 7) === selesai.slice(0, 7) ? fTgl.format(a) : fTglBln.format(a)
   return `${awal} – ${fLengkap.format(b)}`
 }
+
+const keMenit = (j: string) => Number(j.slice(0, 2)) * 60 + Number(j.slice(3, 5))
+
+/** 150 → "2 jam 30 menit", 240 → "4 jam" */
+export const teksDurasi = (menit: number) => [Math.floor(menit / 60) && `${Math.floor(menit / 60)} jam`, menit % 60 && `${menit % 60} menit`].filter(Boolean).join(' ')
+
+/** Cermin aturan catat_ajukan_lembur (OT-02, keputusan Al 14 Nov 2026) agar pengguna tahu sebelum mengirim.
+ *  Jam "HH:MM" yang sudah valid; jamPulang null = hari libur; sekarang = tanggal & jam WIB perangkat. */
+export function cekLembur(p: { tanggal: string; mulai: string; selesai: string; jamPulang: string | null; hariIni: string; jamSekarang: string }) {
+  const menit = keMenit(p.selesai) - keMenit(p.mulai)
+  const pulang = p.jamPulang?.slice(0, 5) ?? null
+  const galat: { tanggal?: string; mulai?: string; selesai?: string } = {}
+  if (p.tanggal < p.hariIni) galat.tanggal = 'Tanggal lembur tidak boleh sebelum hari ini.'
+  else if (p.tanggal === p.hariIni && p.jamSekarang > (pulang ?? p.mulai))
+    galat.tanggal = pulang ? `Batas pengajuan hari ini (jam pulang ${pulang}) sudah lewat.` : 'Jam mulai lembur sudah lewat — pengajuan hari libur harus sebelum jam mulai.'
+  if (pulang && p.mulai < pulang) galat.mulai = `Lembur hari kerja dimulai paling cepat jam pulang (${pulang}).`
+  if (menit <= 0) galat.selesai = 'Jam selesai harus setelah jam mulai.'
+  else if (menit % 30) galat.selesai = 'Durasi lembur harus kelipatan 30 menit.'
+  return { menit, galat }
+}
