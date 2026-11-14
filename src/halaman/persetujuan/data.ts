@@ -1,6 +1,6 @@
 // APR-01, APR-03 — Antrean & riwayat persetujuan Atasan (tingkat 1 untuk bawahan langsung). Nama & jabatan pengaju
 // dari RPC anggota_tim (Atasan tidak membaca baris pengguna bawahan).
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useProfil } from '../../auth/sesi'
 import { useAnggotaTim, type AnggotaTim } from '../absensi/data'
@@ -43,4 +43,67 @@ export function usePersetujuanTim() {
     },
   })
   return { ...q, isPending: anggota.isPending || q.isPending, isError: anggota.isError || q.isError, refetch: () => (anggota.refetch(), q.refetch()) }
+}
+
+/** Konteks keputusan (B2 hal 11–20): lembur → jadwal & clock in pengaju hari itu; cuti → kalender & anggota tim
+ *  lain yang cuti/sakit/izin di tanggal yang sama (menunggu/disetujui). */
+export function useKonteksPersetujuan(p: { jenis: JenisPengajuan; pengguna_id: string; mulai: string; selesai: string } | null) {
+  const anggota = useAnggotaTim()
+  return useQuery({
+    queryKey: ['konteks_persetujuan', p],
+    enabled: !!p && !!anggota.data,
+    queryFn: async () => {
+      if (p!.jenis === 'lembur') {
+        const [jadwal, absensi] = await Promise.all([
+          supabase.rpc('jadwal_tanggal', { tgl: p!.mulai }),
+          supabase.from('absensi').select('jam_masuk, terlambat').eq('pengguna_id', p!.pengguna_id).eq('tanggal', p!.mulai).maybeSingle(),
+        ])
+        if (jadwal.error) throw jadwal.error
+        if (absensi.error) throw absensi.error
+        return {
+          jadwal: ((jadwal.data as { jam_masuk: string; jam_pulang: string }[])[0] ?? null),
+          absensi: absensi.data as { jam_masuk: string; terlambat: boolean } | null,
+          kalender: null,
+          bentrok: [],
+        }
+      }
+      const lain = anggota.data!.filter((a) => a.id !== p!.pengguna_id)
+      const [jadwal, libur, bentrok] = await Promise.all([
+        supabase.from('jadwal_kerja').select('hari'),
+        supabase.from('hari_libur').select('tanggal, keterangan').gte('tanggal', p!.mulai).lte('tanggal', p!.selesai),
+        supabase.from('pengajuan_cuti').select('pengguna_id, jenis, tanggal_mulai, tanggal_selesai, status')
+          .in('pengguna_id', lain.map((a) => a.id)).in('status', ['menunggu', 'disetujui'])
+          .lte('tanggal_mulai', p!.selesai).gte('tanggal_selesai', p!.mulai),
+      ])
+      for (const r of [jadwal, libur, bentrok]) if (r.error) throw r.error
+      const nama = new Map(lain.map((a) => [a.id, a]))
+      return {
+        jadwal: null,
+        absensi: null,
+        kalender: {
+          hariKerja: new Set((jadwal.data as { hari: number }[]).map((j) => j.hari)),
+          libur: new Map((libur.data as { tanggal: string; keterangan: string }[]).map((l) => [l.tanggal, l.keterangan])),
+        },
+        bentrok: (bentrok.data as { pengguna_id: string; jenis: string; tanggal_mulai: string; tanggal_selesai: string; status: string }[])
+          .map((b) => ({ ...b, anggota: nama.get(b.pengguna_id)! })),
+      }
+    },
+  })
+}
+
+export function usePutuskan(jenis: JenisPengajuan, id: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (v: { putusan: 'disetujui' | 'ditolak'; catatan: string }) => {
+      const { error } = await supabase.rpc('putuskan_pengajuan', { jenis, pengajuan: id, putusan: v.putusan, catatan_isi: v.catatan.trim() || null })
+      if (error) {
+        if (['23514', '42501', 'P0002'].includes(error.code ?? '')) throw new Error(error.message)
+        throw new Error('Keputusan gagal disimpan. Periksa koneksi Anda lalu coba lagi. Catatan Anda tidak hilang.')
+      }
+    },
+    onSettled: () => Promise.all([
+      qc.invalidateQueries({ queryKey: ['persetujuan_tim'] }),
+      qc.invalidateQueries({ queryKey: ['pengajuan', jenis, 'detail', id] }),
+    ]),
+  })
 }

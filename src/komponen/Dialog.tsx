@@ -3,7 +3,8 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 
-export default function Dialog({ judul, onTutup, children }: { judul: string; onTutup: () => void; children: ReactNode }) {
+/** `lembar`: bottom sheet di layar sempit (design system B1 hal 2 — radius sheet 20), dialog tengah di layar lebar. */
+export default function Dialog({ judul, onTutup, lembar, children }: { judul: string; onTutup: () => void; lembar?: boolean; children: ReactNode }) {
   const ref = useRef<HTMLDialogElement>(null)
   const idJudul = useId()
 
@@ -17,7 +18,9 @@ export default function Dialog({ judul, onTutup, children }: { judul: string; on
       aria-labelledby={idJudul}
       onClose={onTutup}
       onClick={(e) => e.target === ref.current && ref.current.close()} // klik latar
-      className="m-auto w-[calc(100%-32px)] max-w-[440px] rounded-kartu bg-permukaan p-0 text-teks shadow-xl backdrop:bg-teks/40"
+      className={`bg-permukaan p-0 text-teks shadow-xl backdrop:bg-teks/40 ${lembar
+        ? 'mx-auto mt-auto mb-0 w-full max-w-[480px] rounded-t-sheet pb-[env(safe-area-inset-bottom)] sm:m-auto sm:w-[calc(100%-32px)] sm:max-w-[440px] sm:rounded-kartu sm:pb-0'
+        : 'm-auto w-[calc(100%-32px)] max-w-[440px] rounded-kartu'}`}
     >
       <div className="p-6">
         <div className="flex items-start justify-between gap-4">
